@@ -6,12 +6,10 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   
   allzero  <- rep(0,length(newRowList)) 
   
-  if (is.null(store)) {
-    checkParams(params)
-    store <- initStore(newRowList,params$series)
-  }
-  
+  if (is.null(store)) store <- initStore(newRowList,params$series)
   store <- updateStore(store, newRowList, params$series)
+  
+
   
   
   
