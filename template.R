@@ -36,8 +36,7 @@ updateClStore <- function(clStore, newRowList, series, iter) {
   return(clStore)
 }
 initStore <- function(newRowList,series) {
-  count <- vector(mode="numeric",length=length(series)) # stores # of days in trade
-  return(list(iter=0,cl=initClStore(newRowList,series),count=count))
+  return(list(iter=0,cl=initClStore(newRowList,series)))
 }
 updateStore <- function(store, newRowList, series) {
   store$iter <- store$iter + 1
