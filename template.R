@@ -41,4 +41,3 @@ updateStore <- function(store, newRowList, series) {
   store$cl <- updateClStore(store$cl,newRowList,series,store$iter) 
   return(store)
 }
-
