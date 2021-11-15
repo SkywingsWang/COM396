@@ -3,6 +3,8 @@
 maxRows <- 3100
 
 cciOverSold <- -100
+cciOverBought <- 100
+# rsiOverSold <- 30
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
   
@@ -19,24 +21,50 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     
     for (i in 1:length(params$series)) {
       
-      cl <- newRowList[[params$series[i]]]$Close
+      cl <<- newRowList[[params$series[i]]]$Close
       cci <- last(CCI(store$cl[startIndex:store$iter,i],
                             n=params$lookback,c=params$cciMeanDev))
       
-      macd <- last(MACD(store$cl[startIndex:store$iter,i],
-                      nFast=params$macdFast, nSlow=params$macdSlow,
-                      maType=params$macdMa, percent=TRUE))
+      # rsi <- last(RSI(store$cl[startIndex:store$iter,i], 
+      #                 n=14, maType=list(maUp=list(EMA),maDown=list(WMA))))
       
       if (cci < cciOverSold && !is.na(cci)) {
         # if the cci value is below -100, we take long position
         pos[params$series[i]] <- 1
       }
-      else if (macd[,"signal"] > macd[,"macd"]) {
+      else if (cci > cciOverBought && !is.na(cci)) {
         pos[params$series[i]] <- -1
       }
+      
+      # if (rsi < rsiOverSold && !is.na(rsi)){
+      #   pos[params$series[i]] <- 1
+      # }
+      
+      # stop loss
+      # if () {
+      #   pos[params$series[i]] <- 0
+      # }
+      
     }
   }
   
+  if (store$iter > params$macdLookback) {
+    
+    startIndex <-  store$iter - params$macdLookback
+    
+    for (i in 1:length(params$series)) {
+      
+      macd <- last(MACD(store$cl[startIndex:store$iter,i],
+                        nFast=params$macdFast, nSlow=params$macdSlow,
+                        maType=params$macdMa, percent=TRUE))
+     
+      if (macd[,"signal"] > macd[,"macd"]) {
+        pos[params$series[i]] <- 0
+      } 
+    }
+  }
+  
+  pos <- pos #check the position sizes
   marketOrders <- marketOrders + pos
   
   return(list(store=store,marketOrders=marketOrders,

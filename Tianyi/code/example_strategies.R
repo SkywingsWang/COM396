@@ -24,7 +24,7 @@ example_params <- list(
                     "bbands_holding_period"=list(lookback=50,sdParam=1.5,series=c(1,3),posSizes=rep(1,10),holdPeriod=6),
                     "simple_limit"=list(spreadPercentage=0.001,inventoryLimits=rep(10,10)),
                     "extreme_limit"=list(spreadPercentage=0.001,inventoryLimits=rep(10,10)),
-                    "test"=list(lookback=20, macdLookback=50, series=1:10, cciMeanDev=0.015, macdFast=5, macdSlow=10, macdSig=9, macdMa="EMA")
+                    "test"=list(lookback=20, macdLookback=50, series=c(1,2,3,4,6,7,10), cciMeanDev=0.015, macdFast=12, macdSlow=26, macdSig=9, macdMa="SMA")
                     )
 
 load_strategy <- function(strategy) {
