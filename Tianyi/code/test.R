@@ -18,7 +18,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   if (is.null(store)) store <- initStore(newRowList,params$series)
   store <- updateStore(store, newRowList, params$series)
   
-  marketOrders <- -currentPos; pos <- allzero
+  marketOrders <- allzero; pos <- allzero
   
   # As cci has different lookback with MACD, 
   # this if statement is focused on cci
@@ -53,7 +53,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       # stop loss when the price reaches cciStop times of lines
       if (cci < cciStop*cciOverSold && !is.na(cci) |
           cci > cciStop*cciOverBought && !is.na(cci)) {
-        pos[params$series[i]] <- 0
+        pos[params$series[i]] <- -currentPos[params$series[i]]
       }
     }
   }
@@ -72,7 +72,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       # I think the market has issued a sell signal at this time, 
       # so I lighten up a share
       if (macd[,"signal"] > macd[,"macd"]) {
-        pos[params$series[i]] <- 0
+        pos[params$series[i]] <- -1
       } 
     }
   }
