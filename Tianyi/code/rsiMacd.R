@@ -5,11 +5,8 @@
 
 maxRows <- 3100
 
-cciOverSold <- -100
-cciOverBought <- 100
-# rsiOverSold <- 30
-cciStop <- 1.07 # clear the position when the price reaches this variable's 
-                # multiple times of cci lines
+rsiOverSold <- 30
+rsiOverBought <- 70
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
   
@@ -29,32 +26,21 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     for (i in 1:length(params$series)) {
       
       cl <- newRowList[[params$series[i]]]$Close
-      cci <- last(CCI(store$cl[startIndex:store$iter,i],
-                            n=params$lookback,c=params$cciMeanDev))
+      rsi <- last(RSI(store$cl[startIndex:store$iter,i],n=14,
+                      maType=list(maUp=list(EMA),maDown=list(WMA))))
       
-      # rsi <- last(RSI(store$cl[startIndex:store$iter,i], 
-      #                 n=14, maType=list(maUp=list(EMA),maDown=list(WMA))))
-      
-      # if the cci value is below the oversold line, 
-      # we add one short position, because the market may be overly depressed
-      if (cci < cciOverSold && !is.na(cci)) {
-        pos[params$series[i]] <- -1
-      }
-      # if the cci value is higher than the overbought line, 
-      # we add one long position, because the market may be too mad
-      else if (cci > cciOverBought && !is.na(cci)) {
+      if (rsi < rsiOverSold && !is.na(rsi)) {
         pos[params$series[i]] <- 1
       }
-      
-      # if (rsi < rsiOverSold && !is.na(rsi)){
-      #   pos[params$series[i]] <- 1
-      # }
+      else if (rsi > rsiOverBought && !is.na(rsi)) {
+        pos[params$series[i]] <- -1
+      }
       
       # stop loss when the price reaches cciStop times of lines
-      if (cci < cciStop*cciOverSold && !is.na(cci) |
-          cci > cciStop*cciOverBought && !is.na(cci)) {
-        pos[params$series[i]] <- -currentPos[params$series[i]]
-      }
+      # if (cci < cciStop*cciOverSold && !is.na(cci) |
+      #     cci > cciStop*cciOverBought && !is.na(cci)) {
+      #   pos[params$series[i]] <- -currentPos[params$series[i]]
+      # }
     }
   }
   
