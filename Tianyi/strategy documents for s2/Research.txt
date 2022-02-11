@@ -1,0 +1,46 @@
+Short-term trading focuses on the fluctuating price action of a financial instrument for quick profits, whereas long-term trading focuses on more fundamental aspects and aims to make steady returns over a longer timeframe. Therefore, short-term trading is seen as a more speculative investment type rather than a traditional buy and hold approach.
+
+Possible strategies
+1. Day trading
+    Buy and sell multiple instruments throughout the day with the aim of closing out positions before the market shuts    
+    Features: Can be used for any asset class or financial market; Avoid slippage; Don't need lots of indicators, only focus on price
+    Stop loss: Consider the previous day's low and high price: yesterday's high marked the point where sentiment changed and the sellers came back into the market, pushing the price lower.
+https://www.cmcmarkets.com/en/trading-guides/day-trading
+
+2. Swing trading
+Swing traders focus on taking a position within a larger move, which could last several days or weeks. It is the longest style of short-term trading, as it takes advantage of medium-term movements too. Swing traders will attempt to spot a trend and capitalise on the rises and falls within the overall price movement. They will often rely on technical analysis to identify the entry and exit points for each trade.
+https://www.ig.com/en/trading-strategies/swing-trading-strategies--a-beginners-guide-190712
+
+3. Bollinger Band Squeeze
+https://school.stockcharts.com/doku.php?id=trading_strategies:bollinger_band_squeeze
+
+Questions:
+1.Does a daily trading strategy mean that I have to trade every day? Or does it also require a condition before proceeding, and I trend for a short-period?
+
+2. Slippage?
+20% overnight gap, can be eliminated by day trading
+
+3. Will RSI and stochastic oscillator perform well in short-term trading?
+The RSI compares the relative strength or weakness of a stock compared to other stocks in the market. The stochastic oscillator is used to decide whether a stock is expensive or cheap based on the stock's closing price range over a period of time. (Maybe these two can used to help with the Bollinger Band Squeeze strategy)
+https://www.investopedia.com/articles/trading/09/short-term-trading.asp
+
+Key Points
+1. Use market orders to trade when appropriate and use limit orders to cut losses.
+2. Set Aside Funds by the maximum loss I expect in each trade?
+3. Perhaps combined with indicators such as MA to assist. 
+
+The 2-period RSI strategy looks like a solid short-term strategy, but it is still Trend following. but if I had to use the mean reversion idea, I would have to drop it.
+https://school.stockcharts.com/doku.php?id=trading_strategies:rsi2
+
+Patterns:
+1. Head and Shoulders
+https://www.investopedia.com/terms/h/head-shoulders.asp
+2. Triangles
+https://www.investopedia.com/terms/t/triangle.asp
+3. Double Tops
+https://www.investopedia.com/terms/d/doubletop.asp
+4. Double Bottoms
+https://www.investopedia.com/terms/d/doublebottom.asp
+5. Doji reversal pattern (volume spike+support at this price level)
+https://www.investopedia.com/articles/trading/06/daytradingretail.asp
+
