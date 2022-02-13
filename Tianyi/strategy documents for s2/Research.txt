@@ -1,6 +1,8 @@
+Before I start again, I would not want to modify my previous CCI Trend Following strategy into a short term mean reversion strategy by directly adjusting the parameters, although technically this is entirely feasible. This is because even if it were possible, it might be theoretically difficult to explain, for example, why would you use the CCI indicator in a short-term strategy when it is more suited to a long-term indicator in many cases? So I decided to do some research on this first.
+
 Short-term trading focuses on the fluctuating price action of a financial instrument for quick profits, whereas long-term trading focuses on more fundamental aspects and aims to make steady returns over a longer timeframe. Therefore, short-term trading is seen as a more speculative investment type rather than a traditional buy and hold approach.
 
-Possible strategies
+Strategy ideas
 1. Day trading
     Buy and sell multiple instruments throughout the day with the aim of closing out positions before the market shuts    
     Features: Can be used for any asset class or financial market; Avoid slippage; Don't need lots of indicators, only focus on price
@@ -11,28 +13,28 @@ https://www.cmcmarkets.com/en/trading-guides/day-trading
 Swing traders focus on taking a position within a larger move, which could last several days or weeks. It is the longest style of short-term trading, as it takes advantage of medium-term movements too. Swing traders will attempt to spot a trend and capitalise on the rises and falls within the overall price movement. They will often rely on technical analysis to identify the entry and exit points for each trade.
 https://www.ig.com/en/trading-strategies/swing-trading-strategies--a-beginners-guide-190712
 
-3. Bollinger Band Squeeze
-https://school.stockcharts.com/doku.php?id=trading_strategies:bollinger_band_squeeze
-
 Questions:
 1.Does a daily trading strategy mean that I have to trade every day? Or does it also require a condition before proceeding, and I trend for a short-period?
+The idea of day trading may suggest that traders need to trade every day, but I think this idea of trading may not be suitable for our project as we can only set the trading strategy for the next day on a daily basis. As the number of trades is very limited, this strategy does not guarantee that the position will be cleared at the close.
 
 2. Slippage?
-20% overnight gap, can be eliminated by day trading
+20% overnight gap. This would seem to make day trading very attractive, but for the same reason as above, we cannot use this strategy.
 
 3. Will RSI and stochastic oscillator perform well in short-term trading?
 The RSI compares the relative strength or weakness of a stock compared to other stocks in the market. The stochastic oscillator is used to decide whether a stock is expensive or cheap based on the stock's closing price range over a period of time. (Maybe these two can used to help with the Bollinger Band Squeeze strategy)
 https://www.investopedia.com/articles/trading/09/short-term-trading.asp
 
-Key Points
-1. Use market orders to trade when appropriate and use limit orders to cut losses.
-2. Set Aside Funds by the maximum loss I expect in each trade?
-3. Perhaps combined with indicators such as MA to assist. 
-
-The 2-period RSI strategy looks like a solid short-term strategy, but it is still Trend following. but if I had to use the mean reversion idea, I would have to drop it.
+Possible strategies
+1. Bollinger Band Squeeze
+https://school.stockcharts.com/doku.php?id=trading_strategies:bollinger_band_squeeze
+2. 2-period RSI strategy
 https://school.stockcharts.com/doku.php?id=trading_strategies:rsi2
+3. My existing CCI Trend Following 
+Change the CCI indicator to RSI indicator or something else
 
-Patterns:
+Use market orders to trade when appropriate and use limit orders to cut losses.
+
+Patterns (considerable):
 1. Head and Shoulders
 https://www.investopedia.com/terms/h/head-shoulders.asp
 2. Triangles
