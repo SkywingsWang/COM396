@@ -1,3 +1,5 @@
+Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to short-term mean reversion. For diversity reasons, I have to re-enable the previous CCI Mean reversion strategy.
+
 Before I start again, I would not want to modify my previous CCI Trend Following strategy into a short term mean reversion strategy by directly adjusting the parameters, although technically this is entirely feasible. This is because even if it were possible, it might be theoretically difficult to explain, for example, why would you use the CCI indicator in a short-term strategy when it is more suited to a long-term indicator in many cases? So I decided to do some research on this first.
 
 Short-term trading focuses on the fluctuating price action of a financial instrument for quick profits, whereas long-term trading focuses on more fundamental aspects and aims to make steady returns over a longer timeframe. Therefore, short-term trading is seen as a more speculative investment type rather than a traditional buy and hold approach.
@@ -24,11 +26,15 @@ The idea of day trading may suggest that traders need to trade every day, but I 
 The RSI compares the relative strength or weakness of a stock compared to other stocks in the market. The stochastic oscillator is used to decide whether a stock is expensive or cheap based on the stock's closing price range over a period of time. (Maybe these two can used to help with the Bollinger Band Squeeze strategy)
 https://www.investopedia.com/articles/trading/09/short-term-trading.asp
 
-Possible strategies
+Possible strategies in order of priority, if the results are not good I will try next one
 1. Bollinger Band Squeeze
 https://school.stockcharts.com/doku.php?id=trading_strategies:bollinger_band_squeeze
+According to this research (Short Term Trading Models – Mean Reversion Trading Strategies and the Black Swan Events, https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3538891), Bollinger Bands alone cannot be considered a sign for buy or sell signals, they just show when the asset is overbought or oversold. 
+Q4: What is the difference between trading in overbought and oversold areas and trading in non-overbought and non-oversold areas in a short-term strategy?
+
 2. 2-period RSI strategy
 https://school.stockcharts.com/doku.php?id=trading_strategies:rsi2
+
 3. My existing CCI Trend Following 
 Change the CCI indicator to RSI indicator or something else
 
