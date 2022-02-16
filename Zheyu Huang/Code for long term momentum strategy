@@ -4,9 +4,9 @@ getOrders <- function(store, newRowList, currentPos, info, params) {
   
   allzero  <- rep(0,length(newRowList)) # used for initializing vectors
   
-  lookback <- 60
-  holddays <- 30
-  testlength <- 180
+  lookback <- 90
+  holddays <- 45
+  testlength <- 225
   
   if (is.null(store)) {
     store <- initStore(newRowList,params$series)
@@ -15,13 +15,13 @@ getOrders <- function(store, newRowList, currentPos, info, params) {
   dfm <- as.data.frame(matrix(nrow = nrow(df), ncol = 0))
   
   store <- updateStore(store, newRowList, params$series)
- 
+  
   
   marketOrders <- allzero; marketPos <- allzero
   limitOrders <- allzero; limitPos <- allzero; limitPrice <- allzero
   #print(currentPos)
   
-  if (store$iter > 225) {
+  if (store$iter > 225 && store$iter < 970) {
     numOfDay <- store$iter
     if(numOfDay %% 30 == 1){
       for (i in 1:length(params$series)) {
@@ -51,10 +51,10 @@ getOrders <- function(store, newRowList, currentPos, info, params) {
           lookback_return <- c()
           holddays_return <- c()
           for (k in 1:90) {
-            lookback_return <- c(lookback_return, dfm[numOfDay+k-137,3*i-2]-
-                                   dfm[numOfDay+k-226,3*i-2])
-            holddays_return <- c(holddays_return, dfm[numOfDay+k-92,3*i-2]-
-                                   dfm[numOfDay+k-136,3*i-2])
+            lookback_return <- c(lookback_return, dfm[numOfDay+k-(testlength-lookback+2),3*i-2]-
+                                   dfm[numOfDay+k-testlength-1,3*i-2])
+            holddays_return <- c(holddays_return, dfm[numOfDay+k-lookback-2,3*i-2]-
+                                   dfm[numOfDay+k-(testlength-lookback+1),3*i-2])
           }
           
         }
@@ -68,13 +68,13 @@ getOrders <- function(store, newRowList, currentPos, info, params) {
           cortest <- rbind(store$cortest, corr)
           colnames(cortest) <- c('series', 'runningdays', 'correlation coefficent')
           print(cortest)
-          # the past 180 days showed a relatively strong linear relation
+          # the past 225 days showed a relatively strong linear relation
           # if the past lookback period saw a positive return, long
-         if (dfm[numOfDay-1,3*i-2] - dfm[numOfDay-90,3*i-2] > 0) {
+          if (dfm[numOfDay-1,3*i-2] - dfm[numOfDay-90,3*i-2] > 0) {
             limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
             limitPos[params$series[i]] <- params$posSizes[params$series[i]]
-         }
-           # if the past lookback period saw a negative return, short
+          }
+          # if the past lookback period saw a negative return, short
           else {
             limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
             limitPos[params$series[i]] <- -params$posSizes[params$series[i]]
@@ -89,26 +89,43 @@ getOrders <- function(store, newRowList, currentPos, info, params) {
       for (i in 1:length(params$series)) {
         startindex = 30*(store$iter%/%30)-89
         endindex = 30*(store$iter%/%30)
-        if (currentPos[params$series[i]] > 0) {
+        if (currentPos[params$series[i]] > 0 && store$cl[endindex,i] >= EMA(store$cl[startindex:endindex,i], 90, TRUE)[90]) {
           if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startindex:endindex,i], 90)[90]) {
+            print(i)
+            print(store$iter)
+            print(EMA(store$cl[startindex:endindex,i], 90, TRUE)[90])
+            print(newRowList[[params$series[i]]]$Close-EMA(store$cl[startindex:endindex,i], 90, TRUE)[90])
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
             marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
-          } else if(newRowList[[params$series[i]]]$Close >= 1.4 * store$cl[startindex,i]){
-            if (currentPos[params$series[i]] != 0) {
-              print('stop up lose')
-            }
+          } else if(newRowList[[params$series[i]]]$Close >= 1.3 * store$cl[endindex,i]){
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
             marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
-
+            print('stop win up')
           }
-        } else if (currentPos[params$series[i]] < 0) {
+        } 
+        else if (currentPos[params$series[i]] < 0 && store$cl[endindex,i] <= EMA(store$cl[startindex:endindex,i], 90, TRUE)[90]) {
           if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startindex:endindex,i], 90)[90]) {
+            print(i)
+            print(store$iter)
+            print(newRowList[[params$series[i]]]$Close-EMA(store$cl[startindex:endindex,i], 90)[90])
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
             marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
-          }else if (newRowList[[params$series[i]]]$Close <= 0.7 * store$cl[startindex,i]) {
-            if (currentPos[params$series[i]] != 0) {
-              print('stop down lose')
-            }
+          }else if (newRowList[[params$series[i]]]$Close <= 0.7 * store$cl[endindex,i]) {
+            print('stop win down')
+            marketPos[params$series[i]] <- -currentPos[params$series[i]]
+            marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
+          }
+        } 
+        else if (currentPos[params$series[i]] > 0 && store$cl[endindex,i] < EMA(store$cl[startindex:endindex,i], 90,TRUE)[90]) {
+          if (newRowList[[params$series[i]]]$Close<store$cl[store$iter-1,i]&&store$cl[store$iter-1,i]<store$cl[store$iter-2,i]&&
+              store$cl[store$iter-2,i]<store$cl[store$iter-3,i]&&store$cl[store$iter-3,i]<store$cl[store$iter-4,i]&&store$cl[store$iter-4,i]<store$cl[store$iter-5,i]) {
+            marketPos[params$series[i]] <- -currentPos[params$series[i]]
+            marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
+          }
+        }
+        else if (currentPos[params$series[i]] < 0 && store$cl[endindex,i] > EMA(store$cl[startindex:endindex,i], 90,TRUE)[90]) {
+          if (newRowList[[params$series[i]]]$Close>store$cl[store$iter-1,i]&&store$cl[store$iter-1,i]>store$cl[store$iter-2,i]&&
+              store$cl[store$iter-2,i]>store$cl[store$iter-3,i]&&store$cl[store$iter-3,i]>store$cl[store$iter-4,i]&&store$cl[store$iter-4,i]>store$cl[store$iter-5,i]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
             marketOrders[params$series[i]] <- marketOrders[params$series[i]] + marketPos[params$series[i]]
           }
