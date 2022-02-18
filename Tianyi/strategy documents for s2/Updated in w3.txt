@@ -1,0 +1,2 @@
+Now I have to go back to my previous CCI Trend Following Strategy. 
+First of all, I need to update my trading conditions, because when I implemented this strategy last semester, due to time issues, it was semi-finished. 
