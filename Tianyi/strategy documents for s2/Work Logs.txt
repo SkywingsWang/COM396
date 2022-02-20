@@ -1,5 +1,4 @@
-Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to short-term mean reversion. For diversity reasons, I have to re-enable the previous CCI Mean reversion strategy.
-
+w1-w2:
 Before I start again, I would not want to modify my previous CCI Trend Following strategy into a short term mean reversion strategy by directly adjusting the parameters, although technically this is entirely feasible. This is because even if it were possible, it might be theoretically difficult to explain, for example, why would you use the CCI indicator in a short-term strategy when it is more suited to a long-term indicator in many cases? So I decided to do some research on this first.
 
 Short-term trading focuses on the fluctuating price action of a financial instrument for quick profits, whereas long-term trading focuses on more fundamental aspects and aims to make steady returns over a longer timeframe. Therefore, short-term trading is seen as a more speculative investment type rather than a traditional buy and hold approach.
@@ -52,3 +51,8 @@ https://www.investopedia.com/terms/d/doublebottom.asp
 5. Doji reversal pattern (volume spike+support at this price level)
 https://www.investopedia.com/articles/trading/06/daytradingretail.asp
 
+Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to short-term mean reversion. For diversity reasons, I have to re-enable the previous CCI Mean reversion strategy.
+
+w3:
+Now I have to go back to my previous CCI Trend Following Strategy. 
+First of all, I need to update my trading conditions, because when I implemented this strategy last semester, due to time issues, it was semi-finished. To be specific, I had previously only set up a trade between two CCI indicator lines, but did not consider how the CCI value crossed the two lines (i.e. whether it crossed from above or below). This obviously poses a risk of loss. To solve this problem, I set up a variable cciYesterday, where I can combine the two days of cci values to determine the crossover pattern.
