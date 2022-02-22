@@ -56,3 +56,8 @@ Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to
 w3:
 Now I have to go back to my previous CCI Trend Following Strategy. 
 First of all, I need to update my trading conditions, because when I implemented this strategy last semester, due to time issues, it was semi-finished. To be specific, I had previously only set up a trade between two CCI indicator lines, but did not consider how the CCI value crossed the two lines (i.e. whether it crossed from above or below). This obviously poses a risk of loss. To solve this problem, I set up a variable cciYesterday, where I can combine the two days of cci values to determine the crossover pattern.
+
+w4:
+Position management: In the area below cciOverSold, the buying operation is continued based on the difference between the value of cci and cciOverSold. In areas above cciOverBought, continuous selling and shorting operations are performed based on the difference between the value of cci and cciOverSold.
+The necessity of cciStop needs to be reconsidered.
+The macd indicator might be considered removed as it can be replaced by other long-term strategies with similar functionality (if they perform well) when strategies are merged.
