@@ -59,5 +59,11 @@ First of all, I need to update my trading conditions, because when I implemented
 
 w4:
 Position management: In the area below cciOverSold, the buying operation is continued based on the difference between the value of cci and cciOverSold. In areas above cciOverBought, continuous selling and shorting operations are performed based on the difference between the value of cci and cciOverSold.
-The necessity of cciStop needs to be reconsidered.
+cciStop have been deleted, because I believe this is not a good idea for my new cciOverboughtOversold strategy. 
 The macd indicator might be considered removed as it can be replaced by other long-term strategies with similar functionality (if they perform well) when strategies are merged.
+---------------------------------------
+In addition to researching strategies, I was working on a small program that visualises every trade made in everyone's strategy and came across an interesting problem. This is very similar to the question mentioned in the stack overflow below, that is, after the global variable is initialized, the assignment to it inside the function does not work. 
+https://stackoverflow.com/questions/44983596/r-global-assignment-of-vector-element-works-only-inside-a-function
+It has been sovled by using Global variable identifiers (<<-) when appending values.
+The visualisation program is done, named visualisation.R
+---------------------------------------
