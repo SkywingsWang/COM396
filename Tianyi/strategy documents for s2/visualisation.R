@@ -53,10 +53,14 @@ date <- vector() # Store Date objects to generate x axis
           # Produce all the plots of running series
           for(i in 1:length(params$series)){
             
+            # Save as png
+            png(paste("Graph", toString(i), ".png"),
+                width = 1920, height = 1080, units = "px")
+            
             # x axis: date, generate from newRowList
             # y axis: current position of the specified time series
             matplot(date,strategyMatrix[,i])
-            
+            dev.off()
           }
         }
         
