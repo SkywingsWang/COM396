@@ -11,6 +11,8 @@ strategyMatrix <- matrix(ncol = 10) # Used to store the value of currentPos
                                     # Row: Number of days in operation
                                     # Column: current position value of the 
                                     # time series used
+                                    # !! Needs to be manually aligned with 
+                                    # the number of time series used
 
 runningDays <- 1000 #!! Needs to be manually aligned with the number of days
 
@@ -54,7 +56,7 @@ date <- vector() # Store Date objects to generate x axis
           for(i in 1:length(params$series)){
             
             # Save as png
-            png(paste("Graph", toString(i), ".png"),
+            png(paste("Graph", toString(params$series[i]), ".png"),
                 width = 1920, height = 1080, units = "px")
             
             # x axis: date, generate from newRowList
