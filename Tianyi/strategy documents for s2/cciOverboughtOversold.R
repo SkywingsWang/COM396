@@ -1,5 +1,5 @@
 maxRows <- 3100
-strategyMatrix <- matrix(ncol = 10)
+strategyMatrix <- matrix(ncol = 9)
 runningDays <- 1000
 date <- vector()
 
@@ -29,19 +29,38 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     for (i in 1:length(params$series)) {
       
       cl <- newRowList[[params$series[i]]]$Close
+      # KDJ
+      op <- newRowList[[params$series[i]]]$Open
       
       cciList <- CCI(store$cl[startIndex:store$iter,i],
                      n=params$cciLookback,c=params$cciMeanDev)
       cci <- last(cciList)
       cciYesterday <- cciList[nrow(cciList)-1,]
       
-      if (cci < cciOverSold && !is.na(cci) && !is.na(cciYesterday)) {
+      KDlist <- stoch(store$cl[startIndex:store$iter,i],
+                      nFastK = params$nFastK, nFastD = params$nFastD, 
+                      nSlowD = params$nSlowD, bounded = TRUE,smooth = 1)
+      
+      KD <- last(KDlist)
+      
+      #compute the yesterday KD
+      KD0<- last(KDlist[-nrow(KDlist),])
+      
+      Jline <- 3*KD[,'fastK']- 2*KD[,'fastD'] 
+      Jline0<- 3*KD0[,'fastK']- 2*KD0[,'fastD'] 
+      
+      if (cci < cciOverSold && !is.na(cci) && !is.na(cciYesterday)
+          && Jline0 < params$Jlow && Jline > params$Jlow 
+          && !is.na(Jline)&& !is.na(Jline0)) {
+        
         # pos[params$series[i]] <- abs(round(cci-cciYesterday))
         pos[params$series[i]] <- 1*(maxCl/last(cl))*
           (abs(round(cci-cciYesterday)))/last(cl)
       }
-
-      else if (cci > cciOverBought && !is.na(cci) && !is.na(cciYesterday)) {
+      
+      else if (cci > cciOverBought && !is.na(cci) && !is.na(cciYesterday)
+               && Jline0 > params$Jhigh && Jline < params$Jhigh 
+               &&!is.na(Jline)&& !is.na(Jline0)) {
         # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
         pos[params$series[i]] <- -1*(maxCl/last(cl))*
           (abs(round(cci-cciYesterday)))/last(cl)

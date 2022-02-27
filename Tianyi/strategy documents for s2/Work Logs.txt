@@ -57,13 +57,31 @@ w3:
 Now I have to go back to my previous CCI Trend Following Strategy. 
 First of all, I need to update my trading conditions, because when I implemented this strategy last semester, due to time issues, it was semi-finished. To be specific, I had previously only set up a trade between two CCI indicator lines, but did not consider how the CCI value crossed the two lines (i.e. whether it crossed from above or below). This obviously poses a risk of loss. To solve this problem, I set up a variable cciYesterday, where I can combine the two days of cci values to determine the crossover pattern.
 
+After I drew some charts for analysis, I decided that this previous approach of using two other CCI indicator lines for position management was silly. For example, when the cci value fluctuated between the cciOverSold and cciOverSold*cciStop lines, my original plan was that I might buy when the cci value reached -110 from high to low and then sell when the cci value reached -110 from low to high. This has almost no chance of being profitable, the only profit comes from price fluctuations in the same cci value and not necessarily in a positive way. And since almost all strategies are essentially buying at the lows and selling at the highs for profit, why don't I return to the simplest idea of cci mean reversion for profit?
+So I discussed the issue of strategy merger with Zhangyuan, and we agreed to temporarily use the same idea to make the strategy, and then consider how to merge it next week.
+
 w4:
+For now, my strategy is defined in terms of the overbought and oversold zones of cci - in the overbought zone, the more the value of cci deviates from the overbought line of cci, the more likely I think it has a return. In this case, I will take more shorts, and vice versa.
+
 Position management: In the area below cciOverSold, the buying operation is continued based on the difference between the value of cci and cciOverSold. In areas above cciOverBought, continuous selling and shorting operations are performed based on the difference between the value of cci and cciOverSold.
+
 cciStop have been deleted, because I believe this is not a good idea for my new cciOverboughtOversold strategy. 
+
 The macd indicator might be considered removed as it can be replaced by other long-term strategies with similar functionality (if they perform well) when strategies are merged.
+
 ---------------------------------------
 In addition to researching strategies, I was working on a small program that visualises every trade made in everyone's strategy and came across an interesting problem. This is very similar to the question mentioned in the stack overflow below, that is, after the global variable is initialized, the assignment to it inside the function does not work. 
 https://stackoverflow.com/questions/44983596/r-global-assignment-of-vector-element-works-only-inside-a-function
 It has been sovled by using Global variable identifiers (<<-) when appending values.
 The visualisation program is done, named visualisation.R
 ---------------------------------------
+
+I improved my position sizing based on the method Zhangyuan and Zheyu worked out (letting each time series have the same weight on the overall PD). This resulted in an overall PD ratio of 1.42 in the in sample data (all part 1) with a profit of approximately 100,000, of which 4 time series achieved PDs of around 2 and above. In the first 500 days of P2 (which we call pre-out-of-sample), it performed even better, with an overall PD ratio of 4.98. Among them, time series 3 has a ratio of 5.59, and there are 2 time series with PD ratio greater than 2, and one with PD ratio greater than 1. It's heartening.
+
+Since my strategy performed the best, we decided to use my strategy as the core, combined with Kechen and Zhangyuan's approach, if needed. 
+
+We first completed the visualization of all strategies at the meeting and analyzed them according to the data of Part 1.  
+
+We found that Kechen's strategy can be very sensitive to find the low point of the price, and can always add positions at the right time, so I use his KDJ indicator as a supplementary judgment condition for my strategy. Because his strategy can't run time series 7 (which will cause unexplained errors), I removed time series 7. This time I got a total PD ratio of 1.06 in the in-sample data and a total PD ratio of 1.41 in the pre-out-of-sample, which looks like a reduction in profit. However, after carefully comparing the images we found that while some of the time series had lower profits, all of my losing time series had lower losses. So we all agreed that even though the previous results looked attractive, we still needed to combine my strategy with Kechen's.
+
+From another perspective, in the analysis, we found that although Zhangyuan claimed that his strategy was a mean reversion idea, his strategy actually behaved in the same way as the trend following strategy. This is actually good news, because just like the macd indicator, his strategy may be a better stop loss for my current strategy (after combining with Kechen). I hope that in the next week, Zhangyuan's strategy can be compared with the macd indicator to become a better stop loss strategy.
