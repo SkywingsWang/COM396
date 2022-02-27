@@ -59,7 +59,8 @@ date <- vector() # Store Date objects to generate x axis
             
             # x axis: date, generate from newRowList
             # y axis: current position of the specified time series
-            matplot(date,strategyMatrix[,i])
+            matplot(date,strategyMatrix[,i],
+                    ylab="Current Position", type='l')
             dev.off()
           }
         }
