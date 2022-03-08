@@ -3,6 +3,7 @@ strategyMatrix <- matrix(ncol = 10)
 runningDays <- 1000
 date <- vector()
 
+
 getOrders <- function(store,newRowList,currentPos,info,params) {
   allzero  <- rep(0,length(newRowList)) 
   currentPosition <- vector()
@@ -42,31 +43,16 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         ##### if the lowest price of the day is smaller than the Donchian Channel Low-bound, long the position
         
         marketPos[params$series[i]] <- 100000*(maxCl/cl)*(dc[,3]-movingAverage)/cl
-        # print(params$series)
-        # print(i)
-        # print(pos[params$series[i]])
-        ccc <<- cbind(params$series, i ,pos[params$series[i]] )
-        tt <<- rbind(tt,ccc)
       }
       else if (movingAverage > (dc[,1])) {
         #if the moving average is bigger than the Donchian Channel High-bound, short the position
         #replace the first if condition for movingAverage
         ##### if the highest price of the day is bigger than the Donchian Channel High-bound, short the position
         marketPos[params$series[i]] <- -100000*(maxCl/cl)*(movingAverage-dc[,1])/cl
-        # print(params$series)
-        # print(i)
-        # print(pos[params$series[i]])
-        ddd <<- cbind(params$series, i ,pos[params$series[i]] )
-        tt <<- rbind(tt,ddd)
       }
       
       else{
         marketPos[params$series[i]] = -currentPos[params$series[i]]
-        # print(params$series)
-        # print(i)
-        # print(pos[params$series[i]])
-        eee <<- cbind(params$series, i ,pos[params$series[i]])
-        tt <<- rbind(tt,eee)
       }
       currentPosition <- append(currentPosition,
                                 currentPos[params$series[i]])
@@ -91,20 +77,20 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             lookback_return <- c(lookback_return, store$cl[numOfDay+k-(225-90+2),i]-store$cl[numOfDay+k-225-1,i])
             holddays_return <- c(holddays_return, store$cl[numOfDay+k-90-2,i]- store$cl[numOfDay+k-(225-90+1),i])
           }
+          corr[i] = cor(lookback_return,holddays_return)
           if(cor(lookback_return,holddays_return)>=0.2) {
-            corr[i] = cor(lookback_return,holddays_return)
             if (store$cl[numOfDay-1,i] - store$cl[numOfDay-90,i] > 0) {
               limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
-              limitPos[params$series[i]] <- 1000000 %/% newRowList[[params$series[i]]]$Close
+              limitPos[params$series[i]] <- 100000 %/% newRowList[[params$series[i]]]$Close
             }
             # if the past lookback period saw a negative return, short
             else {
               limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
-              limitPos[params$series[i]] <- -(1000000 %/% newRowList[[params$series[i]]]$Close)
+              limitPos[params$series[i]] <- -(100000 %/% newRowList[[params$series[i]]]$Close)
             }
-          }
+          } 
       }
-      else if(corr[i]<0.2) {
+      else if(corr[i]< 0.2) {
         cl <- newRowList[[params$series[i]]]$Close
         Merge <<- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
         Merge <<- as.data.frame(Merge)
@@ -162,10 +148,10 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     limitOrders <- limitOrders + limitPos
     store <- updateCorr(store,corr)
         
-      }
+  }
+
   
   marketOrders <- marketOrders + marketPos
-  
   return(list(store=store,marketOrders=marketOrders,
               limitOrders1=limitOrders,limitPrices1=limitPrice,
               limitOrders2=allzero,limitPrices2=allzero))
