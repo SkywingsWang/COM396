@@ -119,8 +119,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         }
       }
       else if(corr[i]>=0.2) {
-        if(currentPos[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[90]){
-          if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i], 90)[90]) {
+        if(currentPos[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i])[90]){
+          if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i])[90]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           } else if(newRowList[[params$series[i]]]$Close >= 1.13 * store$cl[endDay,i]){
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
@@ -131,8 +131,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           }
         }
-        else if (currentPos[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[90]) {
-          if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i], 90)[90]) {
+        else if (currentPos[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i])[90]) {
+          if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i])[90]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           }else if (newRowList[[params$series[i]]]$Close <= 0.87 * store$cl[endDay,i]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
