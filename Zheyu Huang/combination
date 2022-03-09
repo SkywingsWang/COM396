@@ -2,7 +2,8 @@ maxRows <- 11000
 strategyMatrix <- matrix(ncol = 10)
 runningDays <- 1000
 date <- vector()
-
+cciOverSold <- -100
+cciOverBought <- 100
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
   allzero  <- rep(0,length(newRowList)) 
@@ -66,7 +67,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     numOfDay <- store$iter
     corr <- store$cor
     for (i in 1:length(params$series)) {
-      startIndex <<-  store$iter - params$lookback
+      startIndex <-  store$iter - params$lookback
       startDay = 30*(store$iter%/%30)-89
       endDay = 30*(store$iter%/%30)
       if(numOfDay %% 30 == 1) {
@@ -92,14 +93,14 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       }
       else if(corr[i]< 0.2) {
         cl <- newRowList[[params$series[i]]]$Close
-        Merge <<- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
-        Merge <<- as.data.frame(Merge)
-        colnames(Merge)[1] <<- "High"
-        colnames(Merge)[2] <<- "Low"
-        colnames(Merge)[3] <<- "Close"
-        dc <<- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
-        movingAverage <<- last(SMA(Merge[,c("Close")],n=params$ma))
-        closePrice <<-Merge[,c("Close")]
+        Merge <- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
+        Merge <- as.data.frame(Merge)
+        colnames(Merge)[1] <- "High"
+        colnames(Merge)[2] <- "Low"
+        colnames(Merge)[3] <- "Close"
+        dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
+        movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
+        closePrice <-Merge[,c("Close")]
         if (movingAverage< (dc[,3])) {
           #if the moving average is lower than the Donchian Channel Low-bound, long the position
           #replace the first if condition for movingAverage
@@ -119,8 +120,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         }
       }
       else if(corr[i]>=0.2) {
-        if(currentPos[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i])[90]){
-          if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i])[90]) {
+        if(currentPos[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[90]){
+          if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i], 90)[90]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           } else if(newRowList[[params$series[i]]]$Close >= 1.13 * store$cl[endDay,i]){
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
@@ -131,8 +132,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           }
         }
-        else if (currentPos[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i])[90]) {
-          if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i])[90]) {
+        else if (currentPos[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[90]) {
+          if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i], 90)[90]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
           }else if (newRowList[[params$series[i]]]$Close <= 0.87 * store$cl[endDay,i]) {
             marketPos[params$series[i]] <- -currentPos[params$series[i]]
@@ -149,7 +150,65 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     store <- updateCorr(store,corr)
         
   }
-
+  # if (store$iter > params$cciLookback) {
+  #   
+  #   startIndex <-  store$iter - params$cciLookback
+  #   
+  #   # Position Sizing
+  #   maxCl <- 0
+  #   for (i in 1:length(params$series)){
+  #     maxCl <- max(maxCl,newRowList[[params$series[i]]]$Close)
+  #   }
+  #   
+  #   for (i in 1:length(params$series)) {
+  #     if (i != 7) {
+  #       cl <- newRowList[[params$series[i]]]$Close
+  #       # KDJ
+  #       op <- newRowList[[params$series[i]]]$Open
+  #       
+  #       cciList <- CCI(store$cl[startIndex:store$iter,i],
+  #                      n=params$cciLookback,c=params$cciMeanDev)
+  #       cci <- last(cciList)
+  #       cciYesterday <- cciList[nrow(cciList)-1,]
+  #       
+  #       KDlist <- stoch(store$cl[startIndex:store$iter,i],
+  #                       nFastK = params$nFastK, nFastD = params$nFastD, 
+  #                       nSlowD = params$nSlowD, bounded = TRUE,smooth = 1)
+  #       
+  #       KD <- last(KDlist)
+  #       
+  #       #compute the yesterday KD
+  #       KD0<- last(KDlist[-nrow(KDlist),])
+  #       
+  #       Jline <- 3*KD[,'fastK']- 2*KD[,'fastD'] 
+  #       Jline0<- 3*KD0[,'fastK']- 2*KD0[,'fastD'] 
+  #       
+  #       if (cci < cciOverSold && !is.na(cci) && !is.na(cciYesterday)
+  #           && Jline0 < params$Jlow && Jline > params$Jlow 
+  #           && !is.na(Jline)&& !is.na(Jline0)) {
+  #         # pos[params$series[i]] <- abs(round(cci-cciYesterday))
+  #         marketPos[params$series[i]] <- marketPos[params$series[i]]+1*(maxCl/last(cl))*
+  #           (abs(round(cci-cciYesterday)))/last(cl)
+  #         print(store$iter)
+  #         print(1*(maxCl/last(cl))*
+  #                 (abs(round(cci-cciYesterday)))/last(cl))
+  #       }
+  #       
+  #       else if (cci > cciOverBought && !is.na(cci) && !is.na(cciYesterday)
+  #                && Jline0 > params$Jhigh && Jline < params$Jhigh 
+  #                &&!is.na(Jline)&& !is.na(Jline0)) {
+  #         # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
+  #         marketPos[params$series[i]] <- marketPos[params$series[i]]-1*(maxCl/last(cl))*
+  #           (abs(round(cci-cciYesterday)))/last(cl)
+  #         print(store$iter)
+  #         print(-1*(maxCl/last(cl))*
+  #                 (abs(round(cci-cciYesterday)))/last(cl))
+  #       }
+  #     }
+  #     
+  #   }
+  # 
+  # }
   
   marketOrders <- marketOrders + marketPos
   return(list(store=store,marketOrders=marketOrders,
