@@ -2,154 +2,180 @@ maxRows <- 11000
 strategyMatrix <- matrix(ncol = 10)
 runningDays <- 1000
 date <- vector()
+
 cciOverSold <- -100
 cciOverBought <- 100
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
+  
   allzero  <- rep(0,length(newRowList)) 
   currentPosition <- vector()
   
   if (is.null(store)){ 
-
     store <- initStore(newRowList,params$series)    
-
-    # high=initHighStore(newRowList,params$series)
   }
   
   store <- updateStore(store, newRowList, params$series)
-  marketOrders <- allzero; marketPos <- allzero
+  marketOrders <- allzero; momentumPos <- allzero
+  dcPos <- allzero; cciPos <- allzero; 
   limitOrders <- allzero; limitPos <- allzero; limitPrice <- allzero
+  
   if(store$iter>params$lookback && store$iter<=225) {
+    
     startIndex <-  store$iter - params$lookback
     maxCl <- 0
+    
     for (i in 1:length(params$series)){
       maxCl <- max(maxCl,newRowList[[params$series[i]]]$Close)
     }
-    
+
     for (i in 1:length(params$series)) {
+      
       cl <- newRowList[[params$series[i]]]$Close
       Merge <- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
       Merge <- as.data.frame(Merge)
+      
       colnames(Merge)[1] <- "High"
       colnames(Merge)[2] <- "Low"
       colnames(Merge)[3] <- "Close"
+      
       dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
       movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
       closePrice <-Merge[,c("Close")]
-      
-      
+
+
       if (movingAverage< (dc[,3])) {
         #if the moving average is lower than the Donchian Channel Low-bound, long the position
         #replace the first if condition for movingAverage
         ##### if the lowest price of the day is smaller than the Donchian Channel Low-bound, long the position
-        
-        marketPos[params$series[i]] <- 100000*(maxCl/cl)*(dc[,3]-movingAverage)/cl
+
+        dcPos[params$series[i]] <- 100000*(maxCl/cl)*(dc[,3]-movingAverage)/cl
       }
       else if (movingAverage > (dc[,1])) {
         #if the moving average is bigger than the Donchian Channel High-bound, short the position
         #replace the first if condition for movingAverage
         ##### if the highest price of the day is bigger than the Donchian Channel High-bound, short the position
-        marketPos[params$series[i]] <- -100000*(maxCl/cl)*(movingAverage-dc[,1])/cl
+        dcPos[params$series[i]] <- -100000*(maxCl/cl)*(movingAverage-dc[,1])/cl
       }
-      
       else{
-        marketPos[params$series[i]] = -currentPos[params$series[i]]
+        dcPos[params$series[i]] = -currentPos[params$series[i]]
       }
-      currentPosition <- append(currentPosition,
-                                currentPos[params$series[i]])
     }
   }
+  
   if(store$iter>225) {
+
     maxCl <- 0
+
     for (i in 1:length(params$series)){
       maxCl <- max(maxCl,newRowList[[params$series[i]]]$Close)
     }
+
     numOfDay <- store$iter
     corr <- store$cor
+
     for (i in 1:length(params$series)) {
+
       startIndex <-  store$iter - params$lookback
       startDay = 30*(store$iter%/%30)-90
       endDay = 30*(store$iter%/%30)
+
       if(numOfDay %% 30 == 1) {
-          corr[i] = 0
-          lookback_return <- c()
-          holddays_return <- c()
-          for (k in 1:90) {
-            lookback_return <- c(lookback_return, store$cl[numOfDay+k-(225-90+2),i]-store$cl[numOfDay+k-225-1,i])
-            holddays_return <- c(holddays_return, store$cl[numOfDay+k-90-2,i]- store$cl[numOfDay+k-(225-90+1),i])
+
+        corr[i] = 0
+        lookback_return <- c()
+        holddays_return <- c()
+
+        for (k in 1:90) {
+          lookback_return <- c(lookback_return, store$cl[numOfDay+k-(225-90+2),i]-store$cl[numOfDay+k-225-1,i])
+          holddays_return <- c(holddays_return, store$cl[numOfDay+k-90-2,i]- store$cl[numOfDay+k-(225-90+1),i])
+        }
+
+        corr[i] = cor(lookback_return,holddays_return)
+
+        if(cor(lookback_return,holddays_return)>=0.2) {
+          if (store$cl[numOfDay-1,i] - store$cl[numOfDay-90,i] > 0) {
+            limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
+            limitPos[params$series[i]] <- 100000 %/% newRowList[[params$series[i]]]$Close
           }
-          corr[i] = cor(lookback_return,holddays_return)
-          if(cor(lookback_return,holddays_return)>=0.2) {
-            if (store$cl[numOfDay-1,i] - store$cl[numOfDay-90,i] > 0) {
-              limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
-              limitPos[params$series[i]] <- 100000 %/% newRowList[[params$series[i]]]$Close
-            }
-            # if the past lookback period saw a negative return, short
-            else {
-              limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
-              limitPos[params$series[i]] <- -(100000 %/% newRowList[[params$series[i]]]$Close)
-            }
+          # if the past lookback period saw a negative return, short
+          else {
+            limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
+            limitPos[params$series[i]] <- -(100000 %/% newRowList[[params$series[i]]]$Close)
           }
+        }
       }
+
       else if(corr[i]< 0.2) {
         cl <- newRowList[[params$series[i]]]$Close
         Merge <- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
         Merge <- as.data.frame(Merge)
+
         colnames(Merge)[1] <- "High"
         colnames(Merge)[2] <- "Low"
         colnames(Merge)[3] <- "Close"
+
         dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
         movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
         closePrice <-Merge[,c("Close")]
+
         if (movingAverage< (dc[,3])) {
           #if the moving average is lower than the Donchian Channel Low-bound, long the position
           #replace the first if condition for movingAverage
           ##### if the lowest price of the day is smaller than the Donchian Channel Low-bound, long the position
-          
-          marketPos[params$series[i]] <- 100000*(maxCl/cl)*(dc[,3]-movingAverage)/cl
+
+          dcPos[params$series[i]] <- 100000*(maxCl/cl)*(dc[,3]-movingAverage)/cl
         }
+
         else if (movingAverage > (dc[,1])) {
           #if the moving average is bigger than the Donchian Channel High-bound, short the position
           #replace the first if condition for movingAverage
           ##### if the highest price of the day is bigger than the Donchian Channel High-bound, short the position
-          marketPos[params$series[i]] <- -100000*(maxCl/cl)*(movingAverage-dc[,1])/cl
+          dcPos[params$series[i]] <- -100000*(maxCl/cl)*(movingAverage-dc[,1])/cl
         }
-        
+
         else{
-          marketPos[params$series[i]] = -currentPos[params$series[i]]
+          dcPos[params$series[i]] = -currentPos[params$series[i]]
         }
       }
+
       else if(corr[i]>=0.2) {
+
         if(currentPos[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[91]){
           if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
-            marketPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
+            momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
           } else if(newRowList[[params$series[i]]]$Close >= 1.13 * store$cl[endDay,i]){
-            marketPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
+            momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
           }
-        } 
+        }
+
         else if (currentPos[params$series[i]] > 0) {
           if(newRowList[[params$series[i]]]$Close >= 1.09 * store$cl[endDay,i]){
-            marketPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
+            momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
           }
         }
+
         else if (currentPos[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
           if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i], 90)[91]) {
-            marketPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
+            momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
           }else if (newRowList[[params$series[i]]]$Close <= 0.87 * store$cl[endDay,i]) {
-            marketPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
+            momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
           }
         }
+
         else if (currentPos[params$series[i]] < 0) {
           if(newRowList[[params$series[i]]]$Close <= 0.91 * store$cl[endDay,i]){
-            marketPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
+            momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
           }
         }
       }
     }
+
     limitOrders <- limitOrders + limitPos
     store <- updateCorr(store,corr)
-        
+
   }
+
   if (store$iter > params$cciLookback) {
 
     startIndex <-  store$iter - params$cciLookback
@@ -187,7 +213,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             && Jline0 < params$Jlow && Jline > params$Jlow
             && !is.na(Jline)&& !is.na(Jline0)) {
           # pos[params$series[i]] <- abs(round(cci-cciYesterday))
-          marketPos[params$series[i]] <- marketPos[params$series[i]]+1*(maxCl/last(cl))*
+          cciPos[params$series[i]] <- 1*(maxCl/last(cl))*
             (abs(round(cci-cciYesterday)))/last(cl)
         }
 
@@ -195,16 +221,14 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
                  && Jline0 > params$Jhigh && Jline < params$Jhigh
                  &&!is.na(Jline)&& !is.na(Jline0)) {
           # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
-          marketPos[params$series[i]] <- marketPos[params$series[i]]-1*(maxCl/last(cl))*
+          cciPos[params$series[i]] <- -1*(maxCl/last(cl))*
             (abs(round(cci-cciYesterday)))/last(cl)
         }
       }
-
     }
-
   }
   
-  marketOrders <- marketOrders + marketPos
+  marketOrders <- marketOrders + momentumPos + dcPos + cciPos
   return(list(store=store,marketOrders=marketOrders,
               limitOrders1=limitOrders,limitPrices1=limitPrice,
               limitOrders2=allzero,limitPrices2=allzero))
