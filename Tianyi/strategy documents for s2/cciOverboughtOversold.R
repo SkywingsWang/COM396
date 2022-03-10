@@ -1,18 +1,12 @@
 # "cciOverboughtOversold"=list(cciLookback=20, series=c(1,2,3,4,5,6,8,9,10),
 #                                                  cciMeanDev=0.015, kdjLookback=20,
+#                                                  cciOverSold=-100, cciOverBought=100,
 #                                                  nFastK=14,nFastD=3,nSlowD=5,Jhigh=0.8,Jlow=0.2)
 maxRows <- 3100
-strategyMatrix <- matrix(ncol = 9)
-runningDays <- 1000
-date <- vector()
-
-cciOverSold <- -100
-cciOverBought <- 100
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
   
   allzero  <- rep(0,length(newRowList)) 
-  currentPosition <- vector()
   
   if (is.null(store)) store <- initStore(newRowList,params$series)
   store <- updateStore(store, newRowList, params$series)
@@ -47,14 +41,14 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       KD <- last(KDlist)
       
       #compute the yesterday KD
-      KD0<- last(KDlist[-nrow(KDlist),])
+      KDYesterday<- last(KDlist[-nrow(KDlist),])
       
       Jline <- 3*KD[,'fastK']- 2*KD[,'fastD'] 
-      Jline0<- 3*KD0[,'fastK']- 2*KD0[,'fastD'] 
+      JlineYesterday<- 3*KDYesterday[,'fastK']- 2*KDYesterday[,'fastD'] 
       
-      if (cci < cciOverSold && !is.na(cci) && !is.na(cciYesterday)
-          && Jline0 < params$Jlow && Jline > params$Jlow 
-          && !is.na(Jline)&& !is.na(Jline0)) {
+      if (cci < params$cciOverSold && !is.na(cci) && !is.na(cciYesterday)
+          && JlineYesterday < params$Jlow && Jline > params$Jlow 
+          && !is.na(Jline)&& !is.na(JlineYesterday)) {
         
         # pos[params$series[i]] <- abs(round(cci-cciYesterday))
         cciPos[params$series[i]] <- 1*(maxCl/last(cl))*
@@ -62,31 +56,13 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         store <- updateCciPos(store,cciPos)
       }
 
-      else if (cci > cciOverBought && !is.na(cci) && !is.na(cciYesterday)
-               && Jline0 > params$Jhigh && Jline < params$Jhigh
-               &&!is.na(Jline)&& !is.na(Jline0)) {
+      else if (cci > params$cciOverBought && !is.na(cci) && !is.na(cciYesterday)
+               && JlineYesterday > params$Jhigh && Jline < params$Jhigh
+               &&!is.na(Jline)&& !is.na(JlineYesterday)) {
         # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
         cciPos[params$series[i]] <- -1*(maxCl/last(cl))*
           (abs(round(cci-cciYesterday)))/last(cl)
         store <- updateCciPos(store,cciPos)
-      }
-      
-      # For visualizing strategy operations
-      currentPosition <- append(currentPosition,
-                                currentPos[params$series[i]])
-    }
-    
-    date <<- append(date,index(newRowList[[1]]))
-    strategyMatrix <<- rbind(strategyMatrix,currentPosition)
-    
-    if(store$iter==runningDays-2){
-      strategyMatrix <- strategyMatrix[-1,]
-      for(i in 1:length(params$series)){
-        png(paste("Graph", toString(params$series[i]), ".png"),
-            width = 1920, height = 1080, units = "px")
-        matplot(date,strategyMatrix[,i], 
-                ylab="Current Position", type='l')
-        dev.off()
       }
     }
   }
