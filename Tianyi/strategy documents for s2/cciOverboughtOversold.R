@@ -1,3 +1,6 @@
+# "cciOverboughtOversold"=list(cciLookback=20, series=c(1,2,3,4,5,6,8,9,10),
+#                                                  cciMeanDev=0.015, kdjLookback=20,
+#                                                  nFastK=14,nFastD=3,nSlowD=5,Jhigh=0.8,Jlow=0.2)
 maxRows <- 3100
 strategyMatrix <- matrix(ncol = 9)
 runningDays <- 1000
@@ -14,7 +17,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   if (is.null(store)) store <- initStore(newRowList,params$series)
   store <- updateStore(store, newRowList, params$series)
   
-  marketOrders <- allzero; pos <- allzero
+  marketOrders <- allzero; cciPos <- allzero
   
   if (store$iter > params$cciLookback) {
     
@@ -54,16 +57,18 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           && !is.na(Jline)&& !is.na(Jline0)) {
         
         # pos[params$series[i]] <- abs(round(cci-cciYesterday))
-        pos[params$series[i]] <- 1*(maxCl/last(cl))*
+        cciPos[params$series[i]] <- 1*(maxCl/last(cl))*
           (abs(round(cci-cciYesterday)))/last(cl)
+        store <- updateCciPos(store,cciPos)
       }
-      
+
       else if (cci > cciOverBought && !is.na(cci) && !is.na(cciYesterday)
-               && Jline0 > params$Jhigh && Jline < params$Jhigh 
+               && Jline0 > params$Jhigh && Jline < params$Jhigh
                &&!is.na(Jline)&& !is.na(Jline0)) {
         # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
-        pos[params$series[i]] <- -1*(maxCl/last(cl))*
+        cciPos[params$series[i]] <- -1*(maxCl/last(cl))*
           (abs(round(cci-cciYesterday)))/last(cl)
+        store <- updateCciPos(store,cciPos)
       }
       
       # For visualizing strategy operations
@@ -77,7 +82,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     if(store$iter==runningDays-2){
       strategyMatrix <- strategyMatrix[-1,]
       for(i in 1:length(params$series)){
-        png(paste("Graph", toString(i), ".png"),
+        png(paste("Graph", toString(params$series[i]), ".png"),
             width = 1920, height = 1080, units = "px")
         matplot(date,strategyMatrix[,i], 
                 ylab="Current Position", type='l')
@@ -86,7 +91,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     }
   }
   
-  marketOrders <- marketOrders + pos
+  marketOrders <- marketOrders + cciPos
   
   return(list(store=store,marketOrders=marketOrders,
               limitOrders1=allzero,
@@ -95,6 +100,10 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
               limitPrices2=allzero))
 }
 
+updateCciPos <- function(store, cciPos) {
+  store$cciPos <- cciPos
+  return(store)
+}
 initClStore  <- function(newRowList,series) {
   clStore <- matrix(0,nrow=maxRows,ncol=length(series))
   return(clStore)
@@ -105,7 +114,8 @@ updateClStore <- function(clStore, newRowList, series, iter) {
   return(clStore)
 }
 initStore <- function(newRowList,series) {
-  return(list(iter=0,cl=initClStore(newRowList,series)))
+  return(list(iter=0,cl=initClStore(newRowList,series),
+              cciPos=cbind(0,0,0,0,0,0,0,0,0,0)))
 }
 updateStore <- function(store, newRowList, series) {
   store$iter <- store$iter + 1
