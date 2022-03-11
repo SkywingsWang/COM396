@@ -332,5 +332,5 @@ initClStore  <- function(newRowList,series) {
 updateClStore <- function(clStore, newRowList, series, iter) {
   for (i in 1:length(series))
     clStore[iter,i] <- as.numeric(newRowList[[series[i]]]$Close)
-  return(clStore)
+  return(clStore) 
 }
