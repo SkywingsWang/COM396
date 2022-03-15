@@ -291,7 +291,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       # I think the market has issued a sell signal at this time, 
       # so I lighten up a share
       if (macd[,"signal"] > macd[,"macd"]) {
-        print(cciPos)
+        cciPos[params$series[i]] <- -cciAccumulatePosition[params$series[i]]
       } 
     }
   }
