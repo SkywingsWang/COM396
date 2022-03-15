@@ -10,13 +10,14 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   
   store <- updateStore(store, newRowList, params$series)
   
-  marketOrders <- allzero; 
+  marketOrders <- allzero
   limitOrders <- allzero; limitPos <- allzero; limitPrice <- allzero
   
-  cciPos <- allzero; 
+  cciPos <- allzero
+  cciAccumulatePosition <- allzero
   momentumPos <- allzero
   momentumPosition <- store$momentumPos
-  dcPos <- allzero; 
+  dcPos <- allzero
   dcPosition <- store$dcPos
   dcCoefficient <- 10000
   
@@ -257,7 +258,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           # pos[params$series[i]] <- abs(round(cci-cciYesterday))
           cciPos[params$series[i]] <- 1*(maxCl/last(cl))*
             (abs(round(cci-cciYesterday)))/last(cl)
-          store <- updateCciPos(store,cciPos)
+          cciAccumulatePosition[params$series[i]] <- 
+            cciAccumulatePosition[params$series[i]] + cciPos[params$series[i]]
+          store <- updateCciPos(store,cciPos,cciAccumulatePosition)
         }
 
         else if (cci > params$cciOverBought && !is.na(cci) && !is.na(cciYesterday)
@@ -266,9 +269,30 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           # pos[params$series[i]] <- -abs(round(cci-cciYesterday))
           cciPos[params$series[i]] <- -1*(maxCl/last(cl))*
             (abs(round(cci-cciYesterday)))/last(cl)
-          store <- updateCciPos(store,cciPos)
+          cciAccumulatePosition[params$series[i]] <- 
+            cciAccumulatePosition[params$series[i]] + cciPos[params$series[i]]
+          store <- updateCciPos(store,cciPos,cciAccumulatePosition)
         }
       }
+    }
+  }
+  
+  # this if statement is focused on MACD
+  if (store$iter > params$macdLookback) {
+    
+    startIndex <-  store$iter - params$macdLookback
+    
+    for (i in 1:length(params$series)) {
+      
+      macd <- last(MACD(store$cl[startIndex:store$iter,i],
+                        nFast=params$macdFast, nSlow=params$macdSlow,
+                        maType=params$macdMa, percent=TRUE))
+      
+      # I think the market has issued a sell signal at this time, 
+      # so I lighten up a share
+      if (macd[,"signal"] > macd[,"macd"]) {
+        print(cciPos)
+      } 
     }
   }
 
@@ -283,8 +307,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
 
 initStore <- function(newRowList,series) {
   return(list(iter=0,high=initHighStore(newRowList,series),low=initLowStore(newRowList,series),cl=initClStore(newRowList,series)
-              , cor = cbind(0,0,0,0,0,0,0,0,0,0), momentumPos = cbind(0,0,0,0,0,0,0,0,0,0),
-              dcPos = cbind(0,0,0,0,0,0,0,0,0,0), cciPos=cbind(0,0,0,0,0,0,0,0,0,0)))
+              , cor = rep(0,10), momentumPos = rep(0,10),
+              dcPos = rep(0,10), cciPos = rep(0,10), cciAccumulatePosition = rep(0,10)))
 }
 updateStore <- function(store, newRowList, series) {
   store$iter <- store$iter + 1
@@ -302,8 +326,9 @@ updateDcPos <- function(store, dcPos) {
   store$dcPos <- dcPos
   return(store)
 }
-updateCciPos <- function(store, cciPos) {
+updateCciPos <- function(store, cciPos, cciAccumulatePosition) {
   store$cciPos <- cciPos
+  store$cciAccumulatePosition <- cciAccumulatePosition
   return(store)
 }
 updateCorr <- function(store,corr) {
