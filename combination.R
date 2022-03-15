@@ -20,9 +20,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   dcPosition <- store$dcPos
   dcCoefficient <- 10000
   
-  if(store$iter>params$lookback && store$iter<=225) {
+  if(store$iter>params$DCLookback && store$iter<=225) {
     
-    startIndex <-  store$iter - params$lookback
+    startIndex <-  store$iter - params$DCLookback
     maxCl <- 0
     
     for (i in 1:length(params$series)){
@@ -39,8 +39,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       colnames(Merge)[2] <- "Low"
       colnames(Merge)[3] <- "Close"
       
-      dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
-      movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
+      dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$DCLookback,include.lag = TRUE))
+      movingAverage <- last(SMA(Merge[,c("Close")],n=params$maLookback))
       closePrice <-Merge[,c("Close")]
       
       if (movingAverage< (dc[,3])) {
@@ -85,7 +85,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     
     for (i in 1:length(params$series)) {
       
-      startIndex <-  store$iter - params$lookback
+      startIndex <-  store$iter - params$DCLookback
       startDay = 30*(store$iter%/%30)-90
       endDay = 30*(store$iter%/%30)
       
@@ -132,8 +132,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         colnames(Merge)[2] <- "Low"
         colnames(Merge)[3] <- "Close"
         
-        dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
-        movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
+        dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$DCLookback,include.lag = TRUE))
+        movingAverage <- last(SMA(Merge[,c("Close")],n=params$maLookback))
         closePrice <-Merge[,c("Close")]
         
         if (movingAverage< (dc[,3])) {
