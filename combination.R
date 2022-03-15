@@ -1,22 +1,25 @@
 maxRows <- 11000
-strategyMatrix <- matrix(ncol = 10)
-runningDays <- 1000
-date <- vector()
-
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
+  
   allzero  <- rep(0,length(newRowList)) 
+  
   if (is.null(store)){ 
     store <- initStore(newRowList,params$series)    
   }
+  
   store <- updateStore(store, newRowList, params$series)
-  marketOrders <- allzero; momentumPos <- allzero
-  dcPos <- allzero; cciPos <- allzero; 
+  
+  marketOrders <- allzero; 
   limitOrders <- allzero; limitPos <- allzero; limitPrice <- allzero
+  
+  cciPos <- allzero; 
+  momentumPos <- allzero
   momentumPosition <- store$momentumPos
+  dcPos <- allzero; 
   dcPosition <- store$dcPos
-  cciPos <- allzero
   dcCoefficient <- 10000
+  
   if(store$iter>params$lookback && store$iter<=225) {
     
     startIndex <-  store$iter - params$lookback
@@ -39,7 +42,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$lookback,include.lag = TRUE))
       movingAverage <- last(SMA(Merge[,c("Close")],n=params$ma))
       closePrice <-Merge[,c("Close")]
-      
       
       if (movingAverage< (dc[,3])) {
         #if the moving average is lower than the Donchian Channel Low-bound, long the position
@@ -215,6 +217,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     store <- updateCorr(store,corr)
     store <- updateMomentumPos(store,momentumPosition)
   }
+  
   if (store$iter > params$cciLookback) {
     startIndex <-  store$iter - params$cciLookback
 
@@ -271,6 +274,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
 
   store <- updateDcPos(store, dcPosition)
   marketOrders <- marketOrders + momentumPos + dcPos + cciPos
+  
   return(list(store=store,marketOrders=marketOrders,
               limitOrders1=limitOrders,limitPrices1=limitPrice,
               limitOrders2=allzero,limitPrices2=allzero))
