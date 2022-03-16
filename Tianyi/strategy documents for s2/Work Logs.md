@@ -103,4 +103,6 @@ In many attempts, I found that my strategy's position was positively correlated 
 
 At the same time, since Zheyu's strategy performed very well in this market, I also tried to use his advantages to make up for the shortcomings of my strategy, that is, to use his judgment condition - correlation. The logic is this, if the past data shows a strong extreme trend and the past data has a 0.5 correlation with the future data, I will give up the trade.
 
-In general, I re-added the MACD variable as stop loss and assisted with zheyu's correlation variable and other variables. This effectively avoids bankrupt and reduces the loss of extreme market prices to an acceptable range. Next, I need to further optimize the parameters of MACD to make the trigger frequency of stop loss more reasonable.
+In general, I re-added the MACD variable as stop loss and assisted with zheyu's correlation variable and other variables. This effectively avoids bankrupt and reduces the loss of extreme market prices to an acceptable range. Next, I need to further optimize the parameters of MACD to make the trigger frequency of stop loss more reasonable. More details can be found in my minutes 16.
+
+But even though there are already two small strategies with stop loss, the stop loss of my strategy is still not mandatory to prohibit raising to high positions, so in some markets it is still possible to lose high positions. I need to consider whether to add another mandatory ban.
