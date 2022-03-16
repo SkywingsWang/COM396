@@ -3,32 +3,33 @@ Before I start again, I would not want to modify my previous CCI Trend Following
 
 Short-term trading focuses on the fluctuating price action of a financial instrument for quick profits, whereas long-term trading focuses on more fundamental aspects and aims to make steady returns over a longer timeframe. Therefore, short-term trading is seen as a more speculative investment type rather than a traditional buy and hold approach.
 
-## Strategy ideas
+### Strategy ideas
 1. Day trading
-    Buy and sell multiple instruments throughout the day with the aim of closing out positions before the market shuts    
-    Features: Can be used for any asset class or financial market; Avoid slippage; Don't need lots of indicators, only focus on price
-    Stop loss: Consider the previous day's low and high price: yesterday's high marked the point where sentiment changed and the sellers came back into the market, pushing the price lower.
+    + Buy and sell multiple instruments throughout the day with the aim of closing out positions before the market shuts    
+    + Features: Can be used for any asset class or financial market; Avoid slippage; Don't need lots of indicators, only focus on price
+    + Stop loss: Consider the previous day's low and high price: yesterday's high marked the point where sentiment changed and the sellers came back into the market, pushing the price lower.
 https://www.cmcmarkets.com/en/trading-guides/day-trading
 
 2. Swing trading
-Swing traders focus on taking a position within a larger move, which could last several days or weeks. It is the longest style of short-term trading, as it takes advantage of medium-term movements too. Swing traders will attempt to spot a trend and capitalise on the rises and falls within the overall price movement. They will often rely on technical analysis to identify the entry and exit points for each trade.
+    + Swing traders focus on taking a position within a larger move, which could last several days or weeks. It is the longest style of short-term trading, as it takes advantage of medium-term movements too. Swing traders will attempt to spot a trend and capitalise on the rises and falls within the overall price movement. They will often rely on technical analysis to identify the entry and exit points for each trade.
 https://www.ig.com/en/trading-strategies/swing-trading-strategies--a-beginners-guide-190712
 
-## Questions:
+### Questions:
 1.Does a daily trading strategy mean that I have to trade every day? Or does it also require a condition before proceeding, and I trend for a short-period?
-The idea of day trading may suggest that traders need to trade every day, but I think this idea of trading may not be suitable for our project as we can only set the trading strategy for the next day on a daily basis. As the number of trades is very limited, this strategy does not guarantee that the position will be cleared at the close.
+    + The idea of day trading may suggest that traders need to trade every day, but I think this idea of trading may not be suitable for our project as we can only set the trading strategy for the next day on a daily basis. As the number of trades is very limited, this strategy does not guarantee that the position will be cleared at the close.
 
 2. Slippage?
-20% overnight gap. This would seem to make day trading very attractive, but for the same reason as above, we cannot use this strategy.
+    + 20% overnight gap. This would seem to make day trading very attractive, but for the same reason as above, we cannot use this strategy.
 
 3. Will RSI and stochastic oscillator perform well in short-term trading?
-The RSI compares the relative strength or weakness of a stock compared to other stocks in the market. The stochastic oscillator is used to decide whether a stock is expensive or cheap based on the stock's closing price range over a period of time. (Maybe these two can used to help with the Bollinger Band Squeeze strategy)
+    + The RSI compares the relative strength or weakness of a stock compared to other stocks in the market. The stochastic oscillator is used to decide whether a stock is expensive or cheap based on the stock's closing price range over a period of time. (Maybe these two can used to help with the Bollinger Band Squeeze strategy)
 https://www.investopedia.com/articles/trading/09/short-term-trading.asp
 
-## Possible strategies in order of priority, if the results are not good I will try next one
+### Possible strategies in order of priority, if the results are not good I will try next one
 1. Bollinger Band Squeeze
 https://school.stockcharts.com/doku.php?id=trading_strategies:bollinger_band_squeeze
 According to this research (Short Term Trading Models – Mean Reversion Trading Strategies and the Black Swan Events, https://papers.ssrn.com/sol3/papers.cfm?abstract_id=3538891), Bollinger Bands alone cannot be considered a sign for buy or sell signals, they just show when the asset is overbought or oversold. 
+
 Q4: What is the difference between trading in overbought and oversold areas and trading in non-overbought and non-oversold areas in a short-term strategy?
 
 2. 2-period RSI strategy
@@ -37,9 +38,9 @@ https://school.stockcharts.com/doku.php?id=trading_strategies:rsi2
 3. My existing CCI Trend Following 
 Change the CCI indicator to RSI indicator or something else
 
-### Use market orders to trade when appropriate and use limit orders to cut losses.
+#### Use market orders to trade when appropriate and use limit orders to cut losses.
 
-## Patterns (considerable):
+### Patterns (considerable):
 1. Head and Shoulders
 https://www.investopedia.com/terms/h/head-shoulders.asp
 2. Triangles
@@ -51,7 +52,7 @@ https://www.investopedia.com/terms/d/doublebottom.asp
 5. Doji reversal pattern (volume spike+support at this price level)
 https://www.investopedia.com/articles/trading/06/daytradingretail.asp
 
-### Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to short-term mean reversion. For diversity reasons, I have to re-enable the previous CCI Mean reversion strategy.
+#### Update 16 Feb 2022: Zhangyuan Xu suddenly claims to have changed his strategy to short-term mean reversion. For diversity reasons, I have to re-enable the previous CCI Mean reversion strategy.
 
 # w3:
 Now I have to go back to my previous CCI Trend Following Strategy. 
@@ -70,14 +71,12 @@ In the area below cciOverSold, the buying operation is continued based on the di
 cciStop have been deleted, because I believe this is not a good idea for my new cciOverboughtOversold strategy. 
 
 The macd indicator might be considered removed as it can be replaced by other long-term strategies with similar functionality (if they perform well) when strategies are merged.
-
----
+***
 In addition to researching strategies, I was working on a small program that visualises every trade made in everyone's strategy and came across an interesting problem. This is very similar to the question mentioned in the stack overflow below, that is, after the global variable is initialized, the assignment to it inside the function does not work. 
 https://stackoverflow.com/questions/44983596/r-global-assignment-of-vector-element-works-only-inside-a-function
 It has been sovled by using Global variable identifiers (<<-) when appending values.
 The visualisation program is done, named visualisation.R
----
-
+***
 I improved my position sizing based on the method Zhangyuan and Zheyu worked out (letting each time series have the same weight on the overall PD). This resulted in an overall PD ratio of 1.42 in the in sample data (all part 1) with a profit of approximately 100,000, of which 4 time series achieved PDs of around 2 and above. In the first 500 days of P2 (which we call pre-out-of-sample), it performed even better, with an overall PD ratio of 4.98. Among them, time series 3 has a ratio of 5.59, and there are 2 time series with PD ratio greater than 2, and one with PD ratio greater than 1. It's heartening.
 
 Since my strategy performed the best, we decided to use my strategy as the core, combined with Kechen and Zhangyuan's approach, if needed. 
