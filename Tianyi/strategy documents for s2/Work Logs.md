@@ -15,7 +15,7 @@ https://www.cmcmarkets.com/en/trading-guides/day-trading
 https://www.ig.com/en/trading-strategies/swing-trading-strategies--a-beginners-guide-190712
 
 ### Questions:
-1.Does a daily trading strategy mean that I have to trade every day? Or does it also require a condition before proceeding, and I trend for a short-period?
+1. Does a daily trading strategy mean that I have to trade every day? Or does it also require a condition before proceeding, and I trend for a short-period?
     + The idea of day trading may suggest that traders need to trade every day, but I think this idea of trading may not be suitable for our project as we can only set the trading strategy for the next day on a daily basis. As the number of trades is very limited, this strategy does not guarantee that the position will be cleared at the close.
 
 2. Slippage?
