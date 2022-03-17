@@ -23,8 +23,10 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   
   cciPos <- allzero
   cciAccumulatePosition <- store$cciAccumulatePosition
+  
   momentumPos <- allzero
   momentumPosition <- store$momentumPos
+  
   dcPos <- allzero
   dcPosition <- store$dcPos
   dcCoefficient <- 50000
@@ -88,7 +90,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       else{
         dcPos[params$series[i]] = -dcPosition[params$series[i]]
         dcPosition[params$series[i]] <- 0
-        
       }
     }
   }
@@ -117,6 +118,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             momentumPosition[params$series[i]] <- 0
           }
         }
+        
         corr[params$series[i]] = 0
         lookback_return <- c()
         holddays_return <- c()
@@ -190,10 +192,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             
           }
         }
-        
         else{
           dcPos[params$series[i]] = -dcPosition[params$series[i]]
-          
           dcPosition[params$series[i]] <- 0
         }
       }
@@ -209,6 +209,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             }
           }
         }
+        
         if(momentumPosition[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[91]){
           if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
             momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
@@ -218,14 +219,12 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             momentumPosition[params$series[i]] <- 0
           }
         }
-        
         else if (momentumPosition[params$series[i]] > 0) {
           if(newRowList[[params$series[i]]]$Close >= 1.09 * store$cl[endDay,i]){
             momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
             momentumPosition[params$series[i]] <- 0
           }
         }
-        
         else if (momentumPosition[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
           if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i], 90)[91]) {
             momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
@@ -235,7 +234,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
             momentumPosition[params$series[i]] <- 0
           }
         }
-        
         else if (momentumPosition[params$series[i]] < 0) {
           if(newRowList[[params$series[i]]]$Close <= 0.91 * store$cl[endDay,i]){
             momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
@@ -293,7 +291,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           cciAccumulatePosition[params$series[i]] <-
             cciAccumulatePosition[params$series[i]] + cciPos[params$series[i]]
         }
-
         else if (cci > params$cciOverBought && !is.na(cci) && !is.na(cciYesterday)
                  && JlineYesterday > params$Jhigh && Jline < params$Jhigh
                  &&!is.na(Jline)&& !is.na(JlineYesterday)) {
