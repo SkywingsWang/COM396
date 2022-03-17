@@ -1,3 +1,11 @@
+params <- list("team1"=list(series=1:10,
+                            cciLookback=20, cciMeanDev=0.015, 
+                            cciOverSold=-100, cciOverBought=100,
+                            BBLookback=40,BBsd=6,
+                            kdjLookback=20,nFastK=14,nFastD=3,
+                            nSlowD=5,Jhigh=0.8,Jlow=0.2,
+                            DCLookback=19,maLookback=3))
+
 maxRows <- 11000
 
 getOrders <- function(store,newRowList,currentPos,info,params) {
@@ -7,7 +15,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   if (is.null(store)){ 
     store <- initStore(newRowList,params$series)    
   }
-  print(info$netWorth)
+
   store <- updateStore(store, newRowList, params$series)
   
   marketOrders <- allzero
@@ -242,6 +250,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   }
   
   if (store$iter > params$cciLookback) {
+    
     startIndex <-  store$iter - params$cciLookback
 
     # Position Sizing
@@ -299,20 +308,21 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     }
   }
 
-  #this if statement is focused on MACD
-  if (store$iter > params$macdLookback) {
+  if (store$iter > params$BBLookback) {
 
-    startIndex <-  store$iter - params$macdLookback
+    startIndex <-  store$iter - params$BBLookback
 
     for (i in 1:length(params$series)) {
 
-      macd <- last(MACD(store$cl[startIndex:store$iter,i],
-                        nFast=params$macdFast, nSlow=params$macdSlow,
-                        maType=params$macdMa, percent=TRUE))
+      bbands <- last(BBands(store$cl[startIndex:store$iter,i],
+                            n=params$BBLookback,sd=params$BBsd))
 
-      # I think the market has issued a sell signal at this time,
-      # so I lighten up a share
-      if (macd[,"signal"] > macd[,"macd"]) {
+      if (cl < bbands[,"dn"]) {
+
+        cciPos[params$series[i]] <- -cciAccumulatePosition[params$series[i]]
+      }
+      else if (cl > bbands[,"up"]) {
+
         cciPos[params$series[i]] <- -cciAccumulatePosition[params$series[i]]
       }
     }
