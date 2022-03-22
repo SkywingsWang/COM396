@@ -1,7 +1,7 @@
 params <- list(series=1:10,
                cciLookback=20, cciMeanDev=0.015, 
-               cciOverSold=-100, cciOverBought=100,
-               BBLookback=50,BBsd=4,
+               cciOverSold=-130, cciOverBought=130,
+               BBLookback=50,BBsd=5,
                kdjLookback=20,nFastK=14,nFastD=3,
                nSlowD=5,Jhigh=0.8,Jlow=0.2,
                DCLookback=19,maLookback=3)
@@ -276,7 +276,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
     
     # Loop all the time series
     for (i in 1:length(params$series)) {
-      
       # Get the latest close price
       cl <- newRowList[[params$series[i]]]$Close
       
