@@ -34,8 +34,11 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   momentumPos <- allzero
   momentumLastTran <- store$momentumPos
   
+  #initial Donchian Channel strategy position to be all 0
   dcPos <- allzero
+  #store the Donchian Chnannel last transaction
   dcLastTran <- store$dcPos
+  #parameter for the position sizing of the Donchian Channel
   dcCoefficient <- 50000
   
   #We use correlation coefficient got from momentum strategy to put constraint on DonchianChannel strategy
@@ -44,35 +47,59 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   if(store$iter > params$DCLookback && store$iter <= params$momentumTestlength) {
     
     startIndex <-  store$iter - params$DCLookback
+    # Get the maximum close price of all the time series, for position sizing.
     maxCl <- 0
-    
     for (i in 1:length(params$series)){
       maxCl <- max(maxCl,newRowList[[params$series[i]]]$Close)
     }
     
     for (i in 1:length(params$series)) {
-      
+      #close price of each series
       cl <- newRowList[[params$series[i]]]$Close
+      #get the daily high and low and close price and merge into one data frame
       Merge <- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
       Merge <- as.data.frame(Merge)
       
+      #change the column name of the data frame to use the DonchainChannel function
       colnames(Merge)[1] <- "High"
       colnames(Merge)[2] <- "Low"
       colnames(Merge)[3] <- "Close"
       
+      #calculate the Donchian Channel high and low bound according to the lookback parameter
       dc <- last(DonchianChannel(Merge[,c("High","Low")],n=params$DCLookback,include.lag = TRUE))
+      #calculate the simple moving average according to the lookback parameter
       movingAverage <- last(SMA(Merge[,c("Close")],n=params$maLookback))
-      closePrice <-Merge[,c("Close")]
       
       if (movingAverage< (dc[,3])) {
-        #if the moving average is lower than the Donchian Channel Low-bound, long the position
-        #replace the first if condition for movingAverage
-        ##### if the lowest price of the day is smaller than the Donchian Channel Low-bound, long the position
+        #if the moving average is lower than the Donchian Channel Low-bound, long the position for that trading day
+        #position sizing is set here
         
+        #on the numerator, dcCoefficient represents relative size of the Donchain Channel strategy to the entire strategy
+        
+        #maxCl/Cl will give a fairly equal weighting to each series on the position sizing
+        #eg: if the maximum close price of the 10 series is 1000, series 1 is 10, series 2 is 20
+        #the allocation for the series that has 1000 close price will be 1000/1000=1
+        #series 1 = 1000/10 =100, series 2 = 1000/ 20 = 50
+        #this is to allocate equal weighting for each series
+        
+        #dc[,3]-movingAverage represents how far the moving average price leaves from the Donchian Channel
+        #the bigger the difference, the bigger the position size
+        
+        #finally divided by close price to gain a fair position for this series
         dcPos[params$series[i]] <- dcCoefficient*(maxCl/cl)*(dc[,3]-movingAverage)/cl
+        
+        #trading stop loss
+        #this is to set a hard limit to make sure the single order money amount of Donchian Channel strategy
+        #in order to avoid potential great loss caused by oversized transaction
         if (dcPos[params$series[i]]*cl>200000){
           dcPos[params$series[i]] <- 200000/cl
         }
+        
+        #the following code gains cumulative position
+        #if the previous trading day's position size is not 0, add the current position size and previous trading position
+        #so that in the next getOrder trading day when there's no trade, the position size can be reduced to 0
+        
+        #if this is the first day the trading is activated, use the current position
         if(dcLastTran[params$series[i]] != 0) {
           dcLastTran[params$series[i]] <- dcLastTran[params$series[i]] + dcPos[params$series[i]]
           
@@ -83,8 +110,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       }
       else if (movingAverage > (dc[,1])) {
         #if the moving average is bigger than the Donchian Channel High-bound, short the position
-        #replace the first if condition for movingAverage
-        ##### if the highest price of the day is bigger than the Donchian Channel High-bound, short the position
+        #the parameter applies to the comment above
         dcPos[params$series[i]] <- -dcCoefficient*(maxCl/cl)*(movingAverage-dc[,1])/cl
         if (dcPos[params$series[i]]*cl< -200000){
           dcPos[params$series[i]] <- -200000/cl
@@ -207,9 +233,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         closePrice <-Merge[,c("Close")]
         
         if (movingAverage< (dc[,3])) {
-          #if the moving average is lower than the Donchian Channel Low-bound, long the position
-          #replace the first if condition for movingAverage
-          ##### if the lowest price of the day is smaller than the Donchian Channel Low-bound, long the position
+          
           dcPos[params$series[i]] <- dcCoefficient*(maxCl/cl)*(dc[,3]-movingAverage)/cl
           if (dcPos[params$series[i]]*cl>200000){
             dcPos[params$series[i]] <- 200000/cl
@@ -224,9 +248,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         }
         
         else if (movingAverage > (dc[,1])) {
-          #if the moving average is bigger than the Donchian Channel High-bound, short the position
-          #replace the first if condition for movingAverage
-          ##### if the highest price of the day is bigger than the Donchian Channel High-bound, short the position
+          
           dcPos[params$series[i]] <- -dcCoefficient*(maxCl/cl)*(movingAverage-dc[,1])/cl
           if (dcPos[params$series[i]]*cl< -200000){
             dcPos[params$series[i]] <- -200000/cl
