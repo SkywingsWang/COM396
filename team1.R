@@ -367,8 +367,16 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           && !is.na(Jline)&& !is.na(JlineYesterday)) {
         
         # Add buy operation in market order
-        cciPos[params$series[i]] <- 1*(maxCl/last(cl))*
-          (abs(round(cci-cciYesterday)))/last(cl)
+        #maxCl/Cl will give a fairly equal weighting to each series on the position sizing
+        #the allocation for the series that has 1000 close price will be 1000/1000=1
+        #series 1 = 1000/10 =100, series 2 = 1000/ 20 = 50
+        #this is to allocate equal weighting for each series
+        
+        # The position is managed by the difference between the cci value of two days, 
+        # the larger the difference, the more positions are added. 
+        # Because we believe that from a short-term perspective, a big fall must be accompanied by a big rise.
+        cciPos[params$series[i]] <- 1*(maxCl/cl)*
+          (abs(round(cci-cciYesterday)))/cl
         
         # Record in store, for stop loss
         cciAccumulatePosition[params$series[i]] <-
@@ -381,8 +389,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
                &&!is.na(Jline)&& !is.na(JlineYesterday)) {
         
         # Add sell operation in market order
-        cciPos[params$series[i]] <- -1*(maxCl/last(cl))*
-          (abs(round(cci-cciYesterday)))/last(cl)
+        # The explaination is the same with above
+        cciPos[params$series[i]] <- -1*(maxCl/cl)*
+          (abs(round(cci-cciYesterday)))/cl
         
         # Record in store, for stop loss
         cciAccumulatePosition[params$series[i]] <-
