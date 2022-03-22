@@ -31,13 +31,15 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   # in order to stop all of the cci-based strategy's position
   cciAccumulatePosition <- store$cciAccumulatePosition
   
+  #initial momentum strategy position to be all 0
   momentumPos <- allzero
-  momentumLastTran <- store$momentumPos
+  #store the momentum last transaction
+  momentumLastTransaction <- store$momentumPos
   
   #initial Donchian Channel strategy position to be all 0
   dcPos <- allzero
   #store the Donchian Chnannel last transaction
-  dcLastTran <- store$dcPos
+  dcLastTransaction <- store$dcPos
   #parameter for the position sizing of the Donchian Channel
   dcCoefficient <- 50000
   
@@ -86,6 +88,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         #the bigger the difference, the bigger the position size
         
         #finally divided by close price to gain a fair position for this series
+        #so that the sizing of each series will not be influenced by the nominal stock price
         dcPos[params$series[i]] <- dcCoefficient*(maxCl/cl)*(dc[,3]-movingAverage)/cl
         
         #trading stop loss
@@ -100,11 +103,11 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         #so that in the next getOrder trading day when there's no trade, the position size can be reduced to 0
         
         #if this is the first day the trading is activated, use the current position
-        if(dcLastTran[params$series[i]] != 0) {
-          dcLastTran[params$series[i]] <- dcLastTran[params$series[i]] + dcPos[params$series[i]]
+        if(dcLastTransaction[params$series[i]] != 0) {
+          dcLastTransaction[params$series[i]] <- dcLastTransaction[params$series[i]] + dcPos[params$series[i]]
           
         } else{
-          dcLastTran[params$series[i]] <- dcPos[params$series[i]]
+          dcLastTransaction[params$series[i]] <- dcPos[params$series[i]]
           
         }
       }
@@ -115,17 +118,17 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         if (dcPos[params$series[i]]*cl< -200000){
           dcPos[params$series[i]] <- -200000/cl
         }
-        if(dcLastTran[params$series[i]] != 0) {
-          dcLastTran[params$series[i]] <- dcLastTran[params$series[i]] + dcPos[params$series[i]]
+        if(dcLastTransaction[params$series[i]] != 0) {
+          dcLastTransaction[params$series[i]] <- dcLastTransaction[params$series[i]] + dcPos[params$series[i]]
           
         } else{
-          dcLastTran[params$series[i]] <- dcPos[params$series[i]]
+          dcLastTransaction[params$series[i]] <- dcPos[params$series[i]]
           
         }
       }
       else{
-        dcPos[params$series[i]] = -dcLastTran[params$series[i]]
-        dcLastTran[params$series[i]] <- 0
+        dcPos[params$series[i]] = -dcLastTransaction[params$series[i]]
+        dcLastTransaction[params$series[i]] <- 0
         
       }
     }
@@ -167,9 +170,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         #The following if stratement is used to stop the momentum strategy's position
         #if the series passed correlation test last time and the position kept being held in the past 30 days
         if(corr[params$series[i]] > 0.2){
-          if(momentumLastTran[params$series[i]] != 0) {
-            momentumPos[params$series[i]] <- -momentumLastTran[params$series[i]]
-            momentumLastTran[params$series[i]] <- 0
+          if(momentumLastTransaction[params$series[i]] != 0) {
+            momentumPos[params$series[i]] <- -momentumLastTransaction[params$series[i]]
+            momentumLastTransaction[params$series[i]] <- 0
           }
         }
         corr[params$series[i]] = 0
@@ -203,7 +206,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
               limitPrice[params$series[i]] <-newRowList[[params$series[i]]]$Close
               limitPos[params$series[i]] <- 100000 %/% newRowList[[params$series[i]]]$Close
               #record the position of the transaction which will be stored in store
-              momentumLastTran[params$series[i]] <- limitPos[params$series[i]]
+              momentumLastTransaction[params$series[i]] <- limitPos[params$series[i]]
             }
             #If the series i pass the correlation test, 
             #short if the close price of series i is smaller than the cl price of series i 90 days ago
@@ -211,7 +214,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
               limitPrice[params$series[i]] <- newRowList[[params$series[i]]]$Close
               limitPos[params$series[i]] <- -(100000 %/% newRowList[[params$series[i]]]$Close)
               #record the position of the transaction which will be stored in store
-              momentumLastTran[params$series[i]] <- limitPos[params$series[i]]
+              momentumLastTransaction[params$series[i]] <- limitPos[params$series[i]]
             }
           }
         }
@@ -219,6 +222,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       
       #If the series i failed in the correaltion test last time,
       #apply DonchianChannel strategy in the following 30 days.
+      #The code below is just the same with line 59-133, has been explained
       else if(corr[i]< 0.2) {
         cl <- newRowList[[params$series[i]]]$Close
         Merge <- cbind(store$high[startIndex:store$iter,i],store$low[startIndex:store$iter,i],store$cl[startIndex:store$iter,i])
@@ -238,11 +242,11 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           if (dcPos[params$series[i]]*cl>200000){
             dcPos[params$series[i]] <- 200000/cl
           }
-          if(dcLastTran[params$series[i]] != 0) {
-            dcLastTran[params$series[i]] <- dcLastTran[params$series[i]] + dcPos[params$series[i]]
+          if(dcLastTransaction[params$series[i]] != 0) {
+            dcLastTransaction[params$series[i]] <- dcLastTransaction[params$series[i]] + dcPos[params$series[i]]
             
           } else{
-            dcLastTran[params$series[i]] <- dcPos[params$series[i]]
+            dcLastTransaction[params$series[i]] <- dcPos[params$series[i]]
             
           }
         }
@@ -253,19 +257,19 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           if (dcPos[params$series[i]]*cl< -200000){
             dcPos[params$series[i]] <- -200000/cl
           }
-          if(dcLastTran[params$series[i]] != 0) {
-            dcLastTran[params$series[i]] <- dcLastTran[params$series[i]] + dcPos[params$series[i]]
+          if(dcLastTransaction[params$series[i]] != 0) {
+            dcLastTransaction[params$series[i]] <- dcLastTransaction[params$series[i]] + dcPos[params$series[i]]
             
           } else{
-            dcLastTran[params$series[i]] <- dcPos[params$series[i]]
+            dcLastTransaction[params$series[i]] <- dcPos[params$series[i]]
             
           }
         }
         
         else{
-          dcPos[params$series[i]] = -dcLastTran[params$series[i]]
+          dcPos[params$series[i]] = -dcLastTransaction[params$series[i]]
           
-          dcLastTran[params$series[i]] <- 0
+          dcLastTransaction[params$series[i]] <- 0
         }
       }
       
@@ -278,38 +282,38 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           #if the position we stored in store is bigger than 0, we long last day
           #If today's low price of series i is bigger than the cl price last day, limit orders fail
           #So set the recorded position to zero in store
-          if(momentumLastTran[params$series[i]] > 0){
+          if(momentumLastTransaction[params$series[i]] > 0){
             if(newRowList[[params$series[i]]]$Low > store$cl[store$iter-1,params$series[i]]){
-              momentumLastTran[params$series[i]] <- 0
+              momentumLastTransaction[params$series[i]] <- 0
             }
           }
           #if the position we stored in store is smaller than 0, we short last day
           #If today's low price of series i is smaller than the cl price last day, limit orders fail
           #set the recorded position to zero in store
-          else if(momentumLastTran[params$series[i]] < 0){
+          else if(momentumLastTransaction[params$series[i]] < 0){
             if(newRowList[[params$series[i]]]$High < store$cl[store$iter-1,params$series[i]]){
-              momentumLastTran[params$series[i]] <- 0
+              momentumLastTransaction[params$series[i]] <- 0
             }
           }
         }
         
         #The following if and else if statement is momentum strategy's stop loss and stop win.
-        if(momentumLastTran[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[91]){
+        if(momentumLastTransaction[params$series[i]] > 0 && store$cl[endDay,i] >= EMA(store$cl[startDay:endDay,i], 90)[91]){
           if (newRowList[[params$series[i]]]$Close <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
             momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
-            momentumLastTran[params$series[i]] <- 0
+            momentumLastTransaction[params$series[i]] <- 0
           } else if(newRowList[[params$series[i]]]$Close >= 1.13 * store$cl[endDay,i]){
             momentumPos[params$series[i]] <- -(100000 %/% store$cl[endDay+1,params$series[i]])
-            momentumLastTran[params$series[i]] <- 0
+            momentumLastTransaction[params$series[i]] <- 0
           }
         }
-        else if (momentumLastTran[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
+        else if (momentumLastTransaction[params$series[i]] < 0 && store$cl[endDay,i] <= EMA(store$cl[startDay:endDay,i], 90)[91]) {
           if (newRowList[[params$series[i]]]$Close >= EMA(store$cl[startDay:endDay,i], 90)[91]) {
             momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
-            momentumLastTran[params$series[i]] <- 0
+            momentumLastTransaction[params$series[i]] <- 0
           }else if (newRowList[[params$series[i]]]$Close <= 0.87 * store$cl[endDay,i]) {
             momentumPos[params$series[i]] <- 100000 %/% store$cl[endDay+1,params$series[i]]
-            momentumLastTran[params$series[i]] <- 0
+            momentumLastTransaction[params$series[i]] <- 0
           }
         }
       }
@@ -346,6 +350,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       
       # Get the cci value list and KD value list, 
       # for recording today's cci/kdj value and yesterday's value
+      # cciYesterday is used to manage the position size
+      # kdjYesterday is used to calculate J line, and function as 
+      # one of the control statement
       cciList <- CCI(store$cl[startIndex:store$iter,i],
                      n=params$cciLookback,c=params$cciMeanDev)
       cci <- last(cciList)
@@ -357,11 +364,15 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       KD <- last(KDlist)
       KDYesterday<- last(KDlist[-nrow(KDlist),])
       
-      # Calculate the J line through KD indicator
+      # Calculate the J line through the KD indicator, 
+      # for catching the lowest point in the short period
       Jline <- 3*KD[,'fastK']- 2*KD[,'fastD']
       JlineYesterday<- 3*KDYesterday[,'fastK']- 2*KDYesterday[,'fastD']
       
-      # Buy
+      # Buy operation
+      # When the value of cci falls into the oversold zone and 
+      # the J line crosses the Jlow from bottom to top, 
+      # we think the stock price will start to rebound, so buy long or short
       if (cci < params$cciOverSold && !is.na(cci) && !is.na(cciYesterday)
           && JlineYesterday < params$Jlow && Jline > params$Jlow
           && !is.na(Jline)&& !is.na(JlineYesterday)) {
@@ -383,7 +394,10 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           cciAccumulatePosition[params$series[i]] + cciPos[params$series[i]]
       }
       
-      # Sell
+      # Sell operation
+      # When the value of cci rises into the overbought zone and 
+      # the J line crosses the Jhigh from top to bottom, 
+      # we think the stock price will start to rebound, so sell long or short
       else if (cci > params$cciOverBought && !is.na(cci) && !is.na(cciYesterday)
                && JlineYesterday > params$Jhigh && Jline < params$Jhigh
                &&!is.na(Jline)&& !is.na(JlineYesterday)) {
@@ -399,6 +413,8 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       }
       
       # Stop loss
+      # When the close price touches the upper and lower rails 
+      # of the Bollinger Band, we clean all the position of this strategy.
       if (store$iter > params$BBLookback) {
         
         startIndex <-  store$iter - params$BBLookback
@@ -410,8 +426,6 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
         bbands <- last(BBands(store$cl[startIndex:store$iter,i],
                               n=params$BBLookback,sd=params$BBsd))
         
-        # When the close price touches the upper and lower rails 
-        # of the Bollinger Band, we clean the position.
         if (cl < bbands[,"dn"]) {
           
           # Reset the position of this strategy
@@ -433,9 +447,9 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   }
   
   # Store all the values we need
-  store <- updateMomentumPos(store,momentumLastTran)
+  store <- updateMomentumPos(store,momentumLastTransaction)
   store <- updateCciPos(store,cciPos,cciAccumulatePosition)
-  store <- updateDcPos(store, dcLastTran)
+  store <- updateDcPos(store, dcLastTransaction)
   
   # Set the market order to be the sum of all the strategies
   marketOrders <- marketOrders + momentumPos + dcPos + cciPos
