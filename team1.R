@@ -427,19 +427,25 @@ updateStore <- function(store, newRowList, series) {
   store$cl <- updateClStore(store$cl,newRowList,series,store$iter) 
   return(store)
 }
+
+#momentumPos records the position of momentum strategy, which will be used for the strategy's stop loss
 updateMomentumPos <- function(store, momentumPos) {
   store$momentumPos <- momentumPos
   return(store)
 }
+#DcPos records the position of DonchianChannel strategy, which will be used for the strategy's stop loss
 updateDcPos <- function(store, dcPos) {
   store$dcPos <- dcPos
   return(store)
 }
+#cciAccumulatePosition records the position of cci-based strategy, which will be used for the strategy's stop loss
 updateCciPos <- function(store, cciPos, cciAccumulatePosition) {
   store$cciPos <- cciPos
   store$cciAccumulatePosition <- cciAccumulatePosition
   return(store)
 }
+#cor records the correaltion coefficient of each series got from last correaltion test,
+#which is used for momentum strategy's stop loss and constrainting the transaction of DonchianChannel strategy
 updateCorr <- function(store,corr) {
   store$cor <- corr
   return(store)
