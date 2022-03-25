@@ -105,9 +105,15 @@ At the same time, since Zheyu's strategy performed very well in this market, I a
 
 In general, I re-added the MACD variable as stop loss and assisted with zheyu's correlation variable and other variables. This effectively avoids bankrupt and reduces the loss of extreme market prices to an acceptable range. Next, I need to further optimize the parameters of MACD to make the trigger frequency of stop loss more reasonable. More details can be found in my minutes 16.
 
-But even though there are already two small strategies with stop loss, the stop loss of my strategy is still not mandatory to prohibit raising to high positions, so in some markets it is still possible to lose high positions. After the parameter adjustment test, I found that the current stop loss method is really difficult to achieve the desired effect, so I decided to use the Bollinger Band stop loss. I found an indicator called BBands stop, which is very similar to Donchian channel, but I think it is not as good as normal BBands for our strategy to stop loss.
+But even though there are already two small strategies with stop loss, the stop loss of my strategy is still not mandatory to prohibit raising to high positions, so in some markets it is still possible to lose high positions. After the parameter adjustment test, I found that the current stop loss method is really difficult to achieve the desired effect, so I decided to use the Bollinger Band to stop loss. 
 
 # w8
-MACD——BBands
+## Before getting P3 data
 
-parameter optimization
+We optimized the parameters of the BBands and CCI indicators. Based on the visualized results, we found that CCI's mean reversion strategy did not always produce correct results, which we guessed was due to the high frequency of trades. Therefore, we adjusted the value of the cci indicator for overbought and oversold judgments to make it more difficult to trigger. We were pleasantly surprised that as the number of transactions decreased, the proportion of correct transactions increased. After weighing the pd ratio, the rate of return and the maximum drawdown, we decided to use plus or minus 130 as the overbought and oversold range. After that, we considered how to stop loss from the two aspects of the sensitivity and width of BBands, and adjusted the lookback and standard deviation of BBands.
+
+## After getting P3 data
+We got an overall PD ratio of about 1.7 with a 5.8% return and a max drawdown of 34k. We immediately looked at the candlestick chart of the part 3 data and found that the image was characterized by large ups and downs. In theory, then, Zheyu's strategy, which focuses on trend following, should take the lead. We ran a series of tests that confirmed our idea. Since Zheyu's strategy and Zhangyuan's strategy are mutually exclusive, Zheyu's correlation indicator can help Zhangyuan trade only at the right time, so although Zhangyuan's strategy is also based on the idea of mean reversion, it is still profitable. Kechen and I's strategy is overall loss-making in this market-led situation, but due to position control, our loss amount is very controllable. Overall, I think our diversity is adequate - so that we can benefit from most markets, and our position control and risk management are excellent, nice job my friends!
+
+During the discussion, we discovered a new problem to be studied:
+    + My combined strategy with Kechen is either very profitable or very losing in time series 1, 3, and 6. Could it be the effect of their relatively low price?
