@@ -1,20 +1,22 @@
-# This piece of code can make the changes of the current position 
-# during the strategy operation into intuitive line charts. 
+# This piece of code can plot the changes of the current position 
+# during operation into intuitive line charts. 
 # Through 10 line charts of 10 time series, combined with 
-# previously made candle charts, we can know whether our strategy 
-# was doing the right thing at the right time, 
-# which can guide the improvement of our strategy. Author: Tianyi Wang
+# previously made close price charts, we can know whether our strategy 
+# is doing the right thing at the right time, 
+# which can guide the improvement of our strategy. 
+# Author: Tianyi Wang
 
-
+# THE LOCATION IS IMPORTANT
 # At the top of the strategy file, before the getOrders() function:
-strategyMatrix <- matrix(ncol = 10) # Used to store the value of currentPos
-                                    # Row: Number of days in operation
-                                    # Column: current position value of the 
-                                    # time series used
-                                    # !! Needs to be manually aligned with 
-                                    # the number of time series used
+# ncol needs to be manually aligned with the actual number of time series!!
+
+# Used to store the value of currentPos
+# Row: Number of days in operation.
+# Column: current position value of the time series used.
+strategyMatrix <- matrix(ncol = 10) 
 
 runningDays <- 1000 #!! Needs to be manually aligned with the number of days
+                    # In sample tests, it can be 500 days!
 
 date <- vector() # Store Date objects to generate x axis
 
@@ -26,13 +28,15 @@ date <- vector() # Store Date objects to generate x axis
     # if (store$iter > params$cciLookback) {
       
       # for (i in 1:length(params$series)) {
-      
+    
+        # The code below needs to be at the end of the for loop!!
         # Append currentPos to a vector
         currentPosition <- append(currentPosition,
                                   currentPos[params$series[i]])
         
       # }
         
+        # The code below is in the if statement but not in the for loop!!
         # Generate the x axis of the line chart
         # Since all time series run on same dates, it is only necessary to 
         # append once outside the for loop
@@ -40,7 +44,7 @@ date <- vector() # Store Date objects to generate x axis
         date <<- append(date,index(newRowList[[1]]))
         
         # Outside the for loop, used to store all currentPos
-        # Have to be <<- , or ERROR
+        # Have to be <<- , otherwise ERROR
         strategyMatrix <<- rbind(strategyMatrix,currentPosition)
         
         # Plotting
@@ -67,8 +71,5 @@ date <- vector() # Store Date objects to generate x axis
           }
         }
         
-    # }
-# }
-
-
-# The result was shown in Team_1_minutes_13.pdf
+    # } # The end of the if statement
+# } # The end of the getOrder function
