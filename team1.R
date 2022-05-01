@@ -329,19 +329,14 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
   # The core idea is mean reversion, 
   # when the market declines, it will continue to add positions, and vice versa.
   
-  # Buy and sell conditions: CCI() and stoch() functions
+  # Long and Short conditions: based on CCI() and stoch() functions
   # Position management: performed by the difference between 
-  # the cci value and the set benchmark (cciOverSold and cciOverBought).
-  # Stop loss: BBands() function. If touched, then clean the position.
+  # the cci value and the cci value of yesterday.
+  # Stop loss: BBands() function. If the upper band or lower band touched, 
+  # then clean the position.
   if (store$iter > params$cciLookback) {
     
     startIndex <-  store$iter - params$cciLookback
-    
-    # Get the maximum close price of all the time series, for position sizing.
-    maxCl <- 0
-    for (i in 1:length(params$series)){
-      maxCl <- max(maxCl,newRowList[[params$series[i]]]$Close)
-    }
     
     # Loop all the time series
     for (i in 1:length(params$series)) {
@@ -369,43 +364,37 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
       Jline <- 3*KD[,'fastK']- 2*KD[,'fastD']
       JlineYesterday<- 3*KDYesterday[,'fastK']- 2*KDYesterday[,'fastD']
       
-      # Buy operation
+      # Long operation
       # When the value of cci falls into the oversold zone and 
       # the J line crosses the Jlow from bottom to top, 
-      # we think the stock price will start to rebound, so buy long or short
+      # we think the stock price will start to rebound, so long operation is taken
       if (cci < params$cciOverSold && !is.na(cci) && !is.na(cciYesterday)
           && JlineYesterday < params$Jlow && Jline > params$Jlow
           && !is.na(Jline)&& !is.na(JlineYesterday)) {
         
-        # Add buy operation in market order
-        #maxCl/Cl will give a fairly equal weighting to each series on the position sizing
-        #the allocation for the series that has 1000 close price will be 1000/1000=1
-        #series 1 = 1000/10 =100, series 2 = 1000/ 20 = 50
-        #this is to allocate equal weighting for each series
-        
+        # Add long position in market order
         # The position is managed by the difference between the cci value of two days, 
         # the larger the difference, the more positions are added. 
-        # Because we believe that from a short-term perspective, a big fall must be accompanied by a big rise.
-        cciPos[params$series[i]] <- 1*(maxCl/cl)*
-          (abs(round(cci-cciYesterday)))/cl
+        # Because we believe that from a short-term perspective, 
+        # a big fall must be accompanied by a big rise.
+        cciPos[params$series[i]] <- 1*(abs(round(cci-cciYesterday)))/cl
         
         # Record in store, for stop loss
         cciAccumulatePosition[params$series[i]] <-
           cciAccumulatePosition[params$series[i]] + cciPos[params$series[i]]
       }
       
-      # Sell operation
+      # Short operation
       # When the value of cci rises into the overbought zone and 
       # the J line crosses the Jhigh from top to bottom, 
-      # we think the stock price will start to rebound, so sell long or short
+      # we think the stock price will start to rebound, so short operation is taken
       else if (cci > params$cciOverBought && !is.na(cci) && !is.na(cciYesterday)
                && JlineYesterday > params$Jhigh && Jline < params$Jhigh
                &&!is.na(Jline)&& !is.na(JlineYesterday)) {
         
-        # Add sell operation in market order
+        # Add short position in market order
         # The explaination is the same with above
-        cciPos[params$series[i]] <- -1*(maxCl/cl)*
-          (abs(round(cci-cciYesterday)))/cl
+        cciPos[params$series[i]] <- -1*(abs(round(cci-cciYesterday)))/cl
         
         # Record in store, for stop loss
         cciAccumulatePosition[params$series[i]] <-
@@ -432,6 +421,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           cciPos[params$series[i]] <- -cciAccumulatePosition[params$series[i]]
           
           # Clear the accumulated value
+          # so that the position of this sub-strategy can be accumulated again
           cciAccumulatePosition[params$series[i]] <- 0
         }
         else if (cl > bbands[,"up"]) {
@@ -440,6 +430,7 @@ getOrders <- function(store,newRowList,currentPos,info,params) {
           cciPos[params$series[i]] <- -cciAccumulatePosition[params$series[i]]
           
           # Clear the accumulated value
+          # so that the position of this sub-strategy can be accumulated again
           cciAccumulatePosition[params$series[i]] <- 0
         }
       }
