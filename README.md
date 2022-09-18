@@ -2,7 +2,7 @@
 Contributors: Tianyi Wang, Shengying Li, Zheyu Huang, Kechen Shi, Zhangyuan Xu
 
 ### Contents
-[Section 1: Final choice of submitted strategy](#Section1:Finalchoiceofsubmittedstrategy)  
+[Section 1: Final choice of submitted strategy](#Section-1:-Final-choice-of-submitted-strategy)  
 * [Section 1.1 About the strategy](#Section1.1Aboutthestrategy)
 * [Section 1.2 Collaboration of the different parts of the strategy](#Section1.2Collaborationofthedifferentpartsofthestrategy)
 * [Section 1.3 Optimising and checking the robustness of your strategy](#Section1.3Optimisingandcheckingtherobustnessofyourstrategy)
@@ -67,12 +67,64 @@ The long-term strategies and the short-term strategy will work simultaneously an
 When the long-term strategies are applied to one series, only the Donchian Channel mean reversion strategy runs until the test length of the momentum strategy is satisfied. To test whether it applies to a trend following strategy or a mean reversion strategy, every series will be conducted by the correlation test. The result will decide which strategy will be operated. So, we can **get a position of the long-term strategy**. Meanwhile, we will **get the other position of the short-term strategy**.
 
 Finally, we **combine these two positions together and get a whole position for this series. Then repeat the above steps for the other series**.  
-![Figure 1](/pic/Figure 1.png)
+<div align="center">
+   
+![Figure 1](/pic/Figure%201.png "Figure 1")
+   
+</div>
+This graph shows that when the length of trading days is bigger than the lookback of the Donchian Channel mean reversion strategy and smaller than 225(the test length of momentum strategy), the Donchian Channel mean reversion strategy will be executed.
+
+If the length of trading days is bigger than 225, then we will conduct a correlation test every 45 days to decide whether the momentum strategy will hold a position. If the momentum strategy makes a trade decision (correlation coefficient is bigger than 0.2), then in the next 44 days, we will test whether the stop loss is triggered every day. If the momentum strategy does not make a trade decision, in the next 44 days, we will run Donchian Channel mean recersion strategy.  
+
+Simultaneously, as long as the length of trading days is bigger than the lookback of the 3-factors mean reversion strategy, we will run the 3-factors mean reversion strategy.  
+
 
 ### Section 1.3 Optimising and checking the robustness of your strategy
 
+Optimize:  
+We have four main approaches to optimise strategies:   
+1. **Visualising close price plots**  
+Using this method, we are able to map the data from time series into the format of close price plots so that we can have a clearer view of how prices change over time. Since this method is prone to overfitting, we have always confirmed during the parameter optimisation process that the close price plots cannot be used as the sole reason for the adjustment. Our final submission will include the code for this function.   
+For example, we introduced some new real-market datasets when testing robustness (more about this later). In one of the data sets, we found that our strategy can bankrupt us at a very fast rate during certain market conditions. By visualising the close price plot as below, we found that these markets are extremely unfavourable for mean reversion strategies because many markets show clear long-term trends like Figure 2. So we need to refine our stop-loss approaches for our mean reversion strategies to avoid bad performances during these market conditions.  
+![Figure 2](/pic/Figure%202.png "Figure 2")
+
+2. **Visualising current positions**  
+This method can record the current position changes of all 10 time series when trading strategies are used and plot it into 10 different graphs. With the help of this visualisation, we can double check whether the strategy is running following our expectations. Our final submission will include the code for this function.  
+<div align="center">
+
+![Figure 3](/pic/Figure%203.png "Figure 3")  
+
+*Above: the close price chart of one series;*   
+*Below: the change of current position size of this series*  
+   
+</div>
+
+3. **In-sample and out-of-sample test**  
+With 2000 days of data, we divide it into three parts, the first part is the in-sample data (1000 days), and the second and third parts are out-of-sample data (500 days respectively). The difference is that we only move to the third part to test when the second part also performs well, as the flow chart shows below. We believe this method can help us avoid the problem of over fitting better than just dividing the data into two parts: in-sample and out-of-sample.  
+![Figure 4](/pic/Figure%204.png "Figure 4")
+
+4. **Printing key variables within the function**  
+In many cases, a good use of the print statement can help us to identify problems in time.  
+For example, we believe that a higher correlation coefficient means a more accurate prediction, so at the beginning we used 0.8 as a criterion. However, by printing the variables, we found that there was only a small chance that the correlation coefficient would be close to 0.8 for all the time series. Furthermore, after trying other optimisation methods mentioned earlier, we concluded that as long as the correlation coefficient was positive, we were confident that the momentum strategy had the potential to be profitable with the help of other judgement conditions. Since the correlation coefficient is greater than 0.2 in most cases, we choose 0.2 as the final value.  
+
+**Robustness:**   
+To test the robustness of the final strategy, we use the new data sets such as stock prices in NYSEto help us find more shortcomings of the strategy. One thing should be mentioned is that this method is only used to check the robustness but not to optimize the parameters.  
+For example, we got a data set with extreme case (The stock price shows clear trends over a period of 1000 days). (see Figure 2)  
+And in this dataset, mean reversion strategies performed badly because the main idea of this strategy is not applicable to this stock at all. So we need to reconsider the position of mean reversion strategies and optimize it in order to minimize the loss and impact when mean reversion strategies are running in an extreme case.  
+
+
+
 ## Section 2: Justification of submitted strategy
+
+*In section 1 we describe in detail the rationale and operation of the individual sub-strategies, as well as the merging of the final strategy. This is followed by a detailed analysis of the strategy in Section 2, including the reasons for the strategy merge, the choice of key elements, the choice of strategy and risk management.*
+
 ### Section 2.1 The reason why we choose this particular strategy and the combination of these sub-strategies
+1. **Choosing this particular strategy**  
+We believe that well-diversified strategy holds more chance to maintain profits and has higher ability to resist the risk. Therefore, our final strategy contains 3 types of methodology to ensure the diversity:  
+   1. **3-factors Mean reversion for short-term**  
+Capture profit in fluctuation, however bear a loss when there is a clear trend
+  
+
 ### Section 2.2 Justification of the choice of position size and other key elements of the strategy
 ### Section 2.3 Comparison of the final strategy with alternatives
 ### Section 2.4 Risk management
