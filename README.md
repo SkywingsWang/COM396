@@ -2,8 +2,8 @@
 Contributors: Tianyi Wang, Shengying Li, Zheyu Huang, Kechen Shi, Zhangyuan Xu
 
 ### Contents
-[Section 1: Final choice of submitted strategy](#Section%201:%20Final%20choice%20of%20submitted%20strategy)  
-* [Section 1.1 About the strategy](#Section%201.1%20About%20the%20strategy)
+<a href="#Section 1: Final choice of submitted strategy">Section 1: Final choice of submitted strategy</a>  
+* <a href="#Section 1.1 About the strategy">Section 1.1 About the strategy</a>  
 * [Section 1.2 Collaboration of the different parts of the strategy](#Section1.2Collaborationofthedifferentpartsofthestrategy)
 * [Section 1.3 Optimising and checking the robustness of your strategy](#Section1.3Optimisingandcheckingtherobustnessofyourstrategy)
 
