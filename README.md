@@ -3,7 +3,7 @@ Contributors: Tianyi Wang, Shengying Li, Zheyu Huang, Kechen Shi, Zhangyuan Xu
 
 ### Contents
 [Section 1: Final choice of submitted strategy](#Section-1:-Final-choice-of-submitted-strategy)  
-* [Section 1.1 About the strategy](#Section1.1Aboutthestrategy)
+* [Section 1.1 About the strategy](#Section-1.1-About-the-strategy)
 * [Section 1.2 Collaboration of the different parts of the strategy](#Section1.2Collaborationofthedifferentpartsofthestrategy)
 * [Section 1.3 Optimising and checking the robustness of your strategy](#Section1.3Optimisingandcheckingtherobustnessofyourstrategy)
 
@@ -122,8 +122,13 @@ And in this dataset, mean reversion strategies performed badly because the main 
 1. **Choosing this particular strategy**  
 We believe that well-diversified strategy holds more chance to maintain profits and has higher ability to resist the risk. Therefore, our final strategy contains 3 types of methodology to ensure the diversity:  
    1. **3-factors Mean reversion for short-term**  
-Capture profit in fluctuation, however bear a loss when there is a clear trend
-  
+   Capture profit in fluctuation, however bear a loss when there is a clear trend  
+
+   2. **Momentum for relatively long-term**  
+   Get benefit when there is a clear trend (like part 3 data)
+   
+   4. **Donchian channel for speculation (or one day holding) **   
+   Speculation holds a chance to make a huge profit but has higher risk.
 
 ### Section 2.2 Justification of the choice of position size and other key elements of the strategy
 ### Section 2.3 Comparison of the final strategy with alternatives
