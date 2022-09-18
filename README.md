@@ -2,8 +2,8 @@
 Contributors: Tianyi Wang, Shengying Li, Zheyu Huang, Kechen Shi, Zhangyuan Xu
 
 ### Contents
-[Section 1: Final choice of submitted strategy](#Section-1:-Final-choice-of-submitted-strategy)  
-* [Section 1.1 About the strategy](#Section-1.1-About-the-strategy)
+[Section 1: Final choice of submitted strategy](#Section%201:%20Final%20choice%20of%20submitted%20strategy)  
+* [Section 1.1 About the strategy](#Section%201.1%20About%20the%20strategy)
 * [Section 1.2 Collaboration of the different parts of the strategy](#Section1.2Collaborationofthedifferentpartsofthestrategy)
 * [Section 1.3 Optimising and checking the robustness of your strategy](#Section1.3Optimisingandcheckingtherobustnessofyourstrategy)
 
@@ -360,7 +360,7 @@ What we have learnt is more than we have mentioned. The standardized procedure, 
 
 ## Section 4: Breakdown of team work
 ### Tianyi Wang
-Our strategy was found to have insufficient diversity in assignment 1. To solve this problem, I took on the responsibility of formulating a new strategy in assignment 2, because my strategy was custom and had more flexibility. For coding part, I implemented the 3-factors mean reversion strategy with Kechen. Apart from that, I completed a small program to visualize the current position by myself, for parameter optimization and final strategy testing. Also, I contributed some valuable ideas and helped some team members to complete several debugs in meetings. More details can be found in the [Work Logs](/Tianyi/strategy documents for s2/Work Logs.md) file in the folder named under my name on GitHub.  
+Our strategy was found to have insufficient diversity in assignment 1. To solve this problem, I took on the responsibility of formulating a new strategy in assignment 2, because my strategy was custom and had more flexibility. For coding part, I implemented the 3-factors mean reversion strategy with Kechen. Apart from that, I completed a small program to visualize the current position by myself, for parameter optimization and final strategy testing. Also, I contributed some valuable ideas and helped some team members to complete several debugs in meetings. More details can be found in the [Work Logs](/Tianyi/strategy%20documents%20for%20s2/Work%20Logs.md) file in the folder named under my name on GitHub.  
 In assignment 3, I sorted out the report structure in this assignment based on the final report template at the meeting with the team members. In this report, I contribute over 2000 effective word counts and some graphics, such as flow charts and visualization results. Besides, I also prepare for the submission of my visualisation file, including comments and readme contents.  
 In meetings, I tend to lead the process as an organizer so that let everyone always understands what to expect from the meeting and what to do after the meeting. Therefore, our team members find meetings to be very efficient and are very happy to solve various problems together. In general, I believe I contribute a lot in terms of teamwork, negotiation, assignment of tasks, etc.  
 
